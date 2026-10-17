@@ -22,6 +22,9 @@ export default defineConfig({
 		emdash({
 			database: d1({ binding: "DB", session: "auto", coalesce: true }),
 			storage: r2({ binding: "MEDIA" }),
+			// The admin's 35 translations are half the Worker bundle (~2.4 MB
+			// compressed); English only keeps it under the free plan's 3 MB limit.
+			admin: { locales: ["en"] },
 		}),
 	],
 	fonts: [
