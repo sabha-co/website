@@ -1,4 +1,5 @@
 ---
+import { url } from "../utils/url";
 import {
 	getEmDashCollection,
 	getTermsForEntries,
@@ -70,7 +71,7 @@ const gridPostsWithTags = gridPosts.map((post) => ({
 				{siteTagline && <p class="intro__subtitle">{siteTagline}</p>}
 			</div>
 			<a
-				href="/rss.xml"
+				href={url("/rss.xml")}
 				type="application/rss+xml"
 				class="btn btn--ghost btn--sm home-intro__rss"
 			>
@@ -133,7 +134,7 @@ const gridPostsWithTags = gridPosts.map((post) => ({
 									Latest posts
 								</h2>
 								{hasMorePosts && (
-									<a href="/posts" class="arrow-link">
+									<a href={url("/posts")} class="arrow-link">
 										View all<span class="sr-only"> posts</span>
 										<svg
 											viewBox="0 0 24 24"

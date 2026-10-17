@@ -3,6 +3,7 @@ import { getEmDashCollection, getSiteSettings } from "emdash";
 
 import { getSiteLocale } from "../utils/locale";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import { url as withBase } from "../utils/url";
 
 export const GET: APIRoute = async ({ site, url }) => {
 	const siteUrl = site ?? new URL(url.origin);
@@ -18,7 +19,7 @@ export const GET: APIRoute = async ({ site, url }) => {
 			if (!post.data.publishedAt) return null;
 			const pubDate = post.data.publishedAt.toUTCString();
 
-			const postUrl = new URL(`/posts/${post.id}`, siteUrl).href;
+			const postUrl = new URL(withBase(`/posts/${post.id}`), siteUrl).href;
 			const title = escapeXml(post.data.title || "Untitled");
 			const description = escapeXml(post.data.excerpt || "");
 
@@ -38,8 +39,8 @@ export const GET: APIRoute = async ({ site, url }) => {
   <channel>
     <title>${escapeXml(siteTitle)}</title>
     <description>${escapeXml(siteTagline)}</description>
-	<link>${siteUrl.href}</link>
-	<atom:link href="${new URL("/rss.xml", siteUrl).href}" rel="self" type="application/rss+xml"/>
+	<link>${new URL(withBase("/"), siteUrl).href}</link>
+	<atom:link href="${new URL(withBase("/rss.xml"), siteUrl).href}" rel="self" type="application/rss+xml"/>
     <language>${getSiteLocale() ?? "en-us"}</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items}

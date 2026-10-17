@@ -1,4 +1,5 @@
 ---
+import { HOME, url } from "../utils/url";
 import { getMenuWithCacheHint, getSiteSettingsWithCacheHint } from "emdash";
 import {
 	WidgetArea,
@@ -85,12 +86,13 @@ const isLoggedIn = !!Astro.locals.user;
 
 const TRAILING_SLASH = /\/$/;
 const currentPath = Astro.url.pathname.replace(TRAILING_SLASH, "") || "/";
+const homePath = HOME.replace(TRAILING_SLASH, "") || "/";
 
 /** "page" for the current page, "true" for its parent section (e.g. Posts on a post). */
-function navCurrent(url: string): "page" | "true" | undefined {
+function navCurrent(href: string): "page" | "true" | undefined {
 	let target: URL;
 	try {
-		target = new URL(url, Astro.url);
+		target = new URL(href, Astro.url);
 	} catch {
 		return undefined;
 	}
@@ -98,7 +100,7 @@ function navCurrent(url: string): "page" | "true" | undefined {
 	if (target.search && target.search !== Astro.url.search) return undefined;
 	const path = target.pathname.replace(TRAILING_SLASH, "") || "/";
 	if (path === currentPath) return "page";
-	if (path !== "/" && currentPath.startsWith(`${path}/`)) return "true";
+	if (path !== homePath && currentPath.startsWith(`${path}/`)) return "true";
 	return undefined;
 }
 
@@ -120,7 +122,7 @@ const year = new Date().getFullYear();
 			rel="alternate"
 			type="application/rss+xml"
 			title={`${siteTitle} RSS Feed`}
-			href="/rss.xml"
+			href={url("/rss.xml")}
 		/>
 		<script is:inline>
 			// Apply an explicit theme choice immediately to prevent flash.
@@ -141,7 +143,7 @@ const year = new Date().getFullYear();
 		<a href="#main" class="skip-link">Skip to content</a>
 		<header class="site-header">
 			<div class="frame site-header__inner">
-				<a href="/" class="brand">
+				<a href={url("/")} class="brand">
 					{
 						siteLogo ? (
 							<img
@@ -206,13 +208,15 @@ const year = new Date().getFullYear();
 							resultsClass="site-search-results"
 							resultClass="site-search-result"
 							collections={["posts", "pages"]}
+							searchPage={url("/search")}
+							routeMap={{ posts: url("/posts/:path"), pages: url("/pages/:path") }}
 						/>
 						<kbd class="site-search__kbd" aria-hidden="true"
 							><span dir="ltr">⌘K</span></kbd
 						>
 					</div>
 					<a
-						href="/search"
+						href={url("/search")}
 						class="icon-btn site-search-link"
 						aria-label="Search"
 					>
@@ -260,7 +264,7 @@ const year = new Date().getFullYear();
 		<footer class="site-footer band">
 			<div class="frame site-footer__grid">
 				<div class="site-footer__brand">
-					<a href="/" class="brand">
+					<a href={url("/")} class="brand">
 						{
 							siteLogo ? (
 								<img
@@ -312,7 +316,7 @@ const year = new Date().getFullYear();
 					<h2 class="eyebrow">Connect</h2>
 					<ul class="site-footer__links">
 						<li>
-							<a href="/rss.xml">
+							<a href={url("/rss.xml")}>
 								<svg
 									viewBox="0 0 24 24"
 									fill="none"

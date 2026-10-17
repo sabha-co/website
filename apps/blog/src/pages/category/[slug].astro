@@ -1,4 +1,5 @@
 ---
+import { url } from "../../utils/url";
 import {
 	getTaxonomyTermsWithCacheHint,
 	getEmDashCollection,
@@ -60,7 +61,7 @@ const filteredPosts = posts.map((post) => ({
 					{term.description || `Posts filed under ${term.label}, newest first.`}
 				</p>
 			</div>
-			<a href="/posts" class="arrow-link">
+			<a href={url("/posts")} class="arrow-link">
 				All posts
 				<svg
 					viewBox="0 0 24 24"
@@ -92,7 +93,7 @@ const filteredPosts = posts.map((post) => ({
 							))}
 						</div>
 						<Pagination
-							basePath={`/category/${term.slug}`}
+							basePath={url(`/category/${term.slug}`)}
 							cursor={cursor}
 							nextCursor={nextCursor}
 						/>
@@ -109,7 +110,7 @@ const filteredPosts = posts.map((post) => ({
 						</p>
 						<div class="empty-state__actions">
 							<a
-								href={cursor ? `/category/${term.slug}` : "/posts"}
+								href={cursor ? url(`/category/${term.slug}`) : url("/posts")}
 								class="btn btn--ghost"
 							>
 								{cursor ? "Back to the first page" : "Browse all posts"}

@@ -136,17 +136,17 @@
 				{
 					"type": "custom",
 					"label": "Home",
-					"url": "/"
+					"url": "/blog"
 				},
 				{
 					"type": "custom",
 					"label": "About",
-					"url": "/pages/about"
+					"url": "/blog/pages/about"
 				},
 				{
 					"type": "custom",
 					"label": "Posts",
-					"url": "/posts"
+					"url": "/blog/posts"
 				}
 			]
 		}
@@ -179,15 +179,6 @@
 					"props": {
 						"count": 5,
 						"showDate": true
-					}
-				},
-				{
-					"type": "component",
-					"componentId": "core:archives",
-					"title": "Archives",
-					"props": {
-						"type": "monthly",
-						"limit": 6
 					}
 				}
 			]

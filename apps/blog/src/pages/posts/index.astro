@@ -1,4 +1,5 @@
 ---
+import { url } from "../../utils/url";
 import { getEmDashCollection, getTermsForEntries } from "emdash";
 import Base from "../../layouts/Base.astro";
 import PostCard from "../../components/PostCard.astro";
@@ -58,7 +59,7 @@ const postsWithTags = posts.map((post) => ({
 						</p>
 						{cursor && (
 							<div class="empty-state__actions">
-								<a href="/posts" class="btn btn--ghost">
+								<a href={url("/posts")} class="btn btn--ghost">
 									First page
 								</a>
 							</div>
@@ -74,7 +75,7 @@ const postsWithTags = posts.map((post) => ({
 							))}
 						</ol>
 						<Pagination
-							basePath="/posts"
+							basePath={url("/posts")}
 							cursor={cursor}
 							nextCursor={nextCursor}
 						/>

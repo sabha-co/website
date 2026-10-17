@@ -1,0 +1,65 @@
+diff --git a/src/components/widgets/Archives.astro b/src/components/widgets/Archives.astro
+index df244b6a1e73352d8a1aa57a4050620721aa4650..a6c901c6e4d781efcc2c00bc51bb3776ebc214ab 100644
+--- a/src/components/widgets/Archives.astro
++++ b/src/components/widgets/Archives.astro
+@@ -21,7 +21,7 @@ const archiveList = groupEntriesByPublishedAt(
+ 	{
+ 		archiveList.map((archive) => (
+ 			<li>
+-				<a href={archive.url} class="widget-archives__link">
++				<a href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}${archive.url}`} class="widget-archives__link">
+ 					{archive.label}
+ 				</a>
+ 				<span class="widget-archives__count">({archive.count})</span>
+diff --git a/src/components/widgets/Categories.astro b/src/components/widgets/Categories.astro
+index 9d7cf682cb5c82d773030db31297059d91ed1e33..f1c7b3985dbd64e9ffdbc4c5ec6c70349f3f003d 100644
+--- a/src/components/widgets/Categories.astro
++++ b/src/components/widgets/Categories.astro
+@@ -20,7 +20,7 @@ const categories = await getTaxonomyTerms("category", { includeCounts: showCount
+ 		categories.length > 0 ? (
+ 			categories.map((category) => (
+ 				<li>
+-					<a href={`/category/${category.slug}`} class="widget-categories__link">
++					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/category/${category.slug}`} class="widget-categories__link">
+ 						{category.label}
+ 					</a>
+ 					{showCount && category.count !== undefined && (
+diff --git a/src/components/widgets/RecentPosts.astro b/src/components/widgets/RecentPosts.astro
+index a51e7ee8e56bca986d162817f4e0c7faa19078c8..952e4bd9a8181174c7f16cb09ec4a597e2294b67 100644
+--- a/src/components/widgets/RecentPosts.astro
++++ b/src/components/widgets/RecentPosts.astro
+@@ -61,7 +61,7 @@ function getTitle(data: Record<string, unknown>): string | undefined {
+ 							{ posts: urlTemplate },
+ 						),
+ 					)
+-				: `/posts/${post.id}`;
++				: `${import.meta.env.BASE_URL.replace(/\/$/, "")}/posts/${post.id}`;
+ 			return (
+ 				<li>
+ 					{showThumbnails && isThumbnailImage(featuredImage) && (
+diff --git a/src/components/widgets/Search.astro b/src/components/widgets/Search.astro
+index 483dc9962aa4558b1f178718f21da8c125b638d3..3ac9b28e0db0a18c6b78c69e49c0817290d4747e 100644
+--- a/src/components/widgets/Search.astro
++++ b/src/components/widgets/Search.astro
+@@ -6,7 +6,7 @@ interface Props {
+ const { placeholder = "Search..." } = Astro.props;
+ ---
+ 
+-<form method="get" action="/search" class="widget-search">
++<form method="get" action={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/search`} class="widget-search">
+ 	<input
+ 		type="search"
+ 		name="q"
+diff --git a/src/components/widgets/Tags.astro b/src/components/widgets/Tags.astro
+index 9ec35f956bfa75d7dfb0828a935833fb91e2c239..bf120e32ebaece925bb6dc387067ae98c21f18f4 100644
+--- a/src/components/widgets/Tags.astro
++++ b/src/components/widgets/Tags.astro
+@@ -22,7 +22,7 @@ const tags = allTags.slice(0, limit);
+ 			<ul class="widget-tags__cloud">
+ 				{tags.map((tag) => (
+ 					<li>
+-						<a href={`/tag/${tag.slug}`} class="widget-tags__link">
++						<a href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/tag/${tag.slug}`} class="widget-tags__link">
+ 							{tag.label}
+ 						</a>
+ 						{showCount && tag.count !== undefined && (

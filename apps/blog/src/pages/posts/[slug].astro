@@ -1,4 +1,5 @@
 ---
+import { url } from "../../utils/url";
 import {
 	getEmDashEntry,
 	getEmDashCollection,
@@ -126,7 +127,7 @@ const hasHeadings = (post.data.content ?? []).some(
 		<header class="intro post-header">
 			<div class="frame">
 				<div class="post-header__inner">
-					<a href="/posts" class="arrow-link back-link">
+					<a href={url("/posts")} class="arrow-link back-link">
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"
@@ -146,7 +147,7 @@ const hasHeadings = (post.data.content ?? []).some(
 							<ul class="chips post-header__tags" aria-label="Tags">
 								{tags.map((t) => (
 									<li>
-										<a href={`/tag/${t.slug}`} class="chip">
+										<a href={url(`/tag/${t.slug}`)} class="chip">
 											{t.label}
 										</a>
 									</li>
@@ -272,7 +273,7 @@ const hasHeadings = (post.data.content ?? []).some(
 						<h2 id="continue-reading" class="section-head__title">
 							Continue reading
 						</h2>
-						<a href="/posts" class="arrow-link">
+						<a href={url("/posts")} class="arrow-link">
 							All posts
 							<svg
 								viewBox="0 0 24 24"
