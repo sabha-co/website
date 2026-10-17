@@ -71,6 +71,10 @@
 		--frame-text: 720px;
 		--content-width: var(--frame-text);
 		--grid-size: 48px;
+		--line: 1.5px;
+		--color-line: light-dark(oklch(90% 0.005 265), oklch(32% 0.012 271));
+		--color-brand-tint: light-dark(oklch(97% 0.015 317), oklch(26% 0.03 317));
+		--ease: 140ms ease;
 		--color-grid: light-dark(oklch(96.5% 0.003 265), oklch(22.5% 0.009 272));
 		--gutter: 16px;
 		--radius-sm: 4px;
@@ -96,6 +100,8 @@
 			--color-brand-hover: oklch(40% 0.13 317);
 			--color-on-brand: oklch(100% 0 0);
 			--color-grid: oklch(96.5% 0.003 265);
+			--color-line: oklch(90% 0.005 265);
+			--color-brand-tint: oklch(97% 0.015 317);
 		}
 	}
 }
