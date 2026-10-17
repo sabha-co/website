@@ -1,62 +1,39 @@
-# EmDash Blog Template
+# Sabha blog
 
-A clean, minimal blog built with [EmDash](https://github.com/emdash-cms/emdash). Runs on any Node.js server with SQLite and local file storage.
+The blog at **sabha.co/blog**: an [EmDash](https://github.com/emdash-cms/emdash) site (Astro + SQLite), started from EmDash's Node blog template. It runs as a Kamal accessory beside Sabha. kamal-proxy routes `/blog` and `/_emdash` to it and everything else to Rails (see `config/deploy.multitenant.yml` in sabha-ai).
 
-![Blog template homepage](https://raw.githubusercontent.com/emdash-cms/emdash/main/assets/templates/blog/latest/homepage-light-desktop.jpg)
-
-## What's Included
-
-- Featured post hero on the homepage
-- Post archive with reading time estimates
-- Category and tag archives
-- Full-text search
-- RSS feed
-- SEO metadata and JSON-LD
-- Dark/light mode
-
-## Pages
-
-| Page | Route |
-|---|---|
-| Homepage | `/` |
-| All posts | `/posts` |
-| Single post | `/posts/:slug` |
-| Category archive | `/category/:slug` |
-| Tag archive | `/tag/:slug` |
-| Search | `/search` |
-| Static pages | `/pages/:slug` |
-| 404 | fallback |
-
-## Screenshots
-
-| | Desktop | Mobile |
-|---|---|---|
-| Light | ![homepage light desktop](https://raw.githubusercontent.com/emdash-cms/emdash/main/assets/templates/blog/latest/homepage-light-desktop.jpg) | ![homepage light mobile](https://raw.githubusercontent.com/emdash-cms/emdash/main/assets/templates/blog/latest/homepage-light-mobile.jpg) |
-| Dark | ![homepage dark desktop](https://raw.githubusercontent.com/emdash-cms/emdash/main/assets/templates/blog/latest/homepage-dark-desktop.jpg) | ![homepage dark mobile](https://raw.githubusercontent.com/emdash-cms/emdash/main/assets/templates/blog/latest/homepage-dark-mobile.jpg) |
-
-## Infrastructure
-
-- **Runtime:** Node.js
-- **Database:** SQLite (local file)
-- **Storage:** Local filesystem
-- **Framework:** Astro with `@astrojs/node`
-
-## Getting Started
+## Running locally
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Open http://localhost:4321/_emdash/admin and complete the setup wizard. EmDash runs database migrations and applies the blog seed during setup. The site is available at http://localhost:4321.
+Open http://localhost:4321/_emdash/admin and complete the setup wizard, which applies `seed/seed.json`. The site is at http://localhost:4321/blog.
 
-## Want Cloudflare Instead?
+## Serving under /blog
 
-See the [Cloudflare variant](../blog-cloudflare) for a version that deploys to Cloudflare Workers with D1 and R2.
+- `astro.config.mjs` sets `base: "/blog"`, and kamal-proxy forwards the prefix unstripped.
+- EmDash keeps its admin, API and media URLs at the root (`/_emdash/...`) whatever the base is. That's why the proxy routes `/_emdash` here too, and why those links don't go through `url()`.
+- Every public link goes through `url()` in `src/utils/url.ts`. Write `url("/posts")`, never `"/posts"`; a bare root path escapes to Sabha.
+- Custom menu items store absolute paths (`/blog/posts`), so do the same when adding menu items in the admin.
+- `patches/emdash@1.3.0.patch` makes EmDash's sidebar widgets (categories, tags, search, recent posts, archives) honour the base. It's upstream bug [#2482](https://github.com/emdash-cms/emdash/issues/2482). When an EmDash upgrade fixes it, the patch stops applying; delete it then.
+- `src/pages/sitemap.xml.ts` replaces EmDash's injected sitemap, which doesn't work under a base (the same bug).
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/emdash-cms/templates/tree/main/blog-cloudflare)
+## Deploying
 
-## See Also
+Pushing to `main` builds `ghcr.io/sabha-co/sabha-blog:latest` (`.github/workflows/publish.yml`). Then, from sabha-ai:
 
-- [All templates](../)
-- [EmDash documentation](https://docs.emdashcms.com/)
+```bash
+kamal accessory reboot blog -d multitenant   # pulls :latest, restarts (a few seconds down)
+```
+
+Content changes made in the admin are live straight away and need no deploy. Only code and template changes do.
+
+First-time setup on the server:
+
+1. Generate the key with `npx emdash secrets generate`, add it as `EMDASH_ENCRYPTION_KEY` to sabha-ai's GitHub secrets and to the local env behind `.kamal/secrets.multitenant`, and keep a copy somewhere safe. Plugin secrets can't be read back without it.
+2. `sudo install -d -o 1000 -g 1000 /disk/sabha-blog`, since the container runs as uid 1000.
+3. `kamal accessory boot blog -d multitenant`, then complete the setup wizard at https://sabha.co/_emdash/admin.
+
+Back up `/disk/sabha-blog`: it holds `emdash.db` and `uploads/`.
