@@ -1,8 +1,7 @@
 ---
 import { getTaxonomyTermsWithCacheHint, getEmDashCollection, decodeSlug } from "emdash";
 import Base from "../../layouts/Base.astro";
-import PostList from "../../components/PostList.astro";
-import Pagination from "../../components/Pagination.astro";
+import BlogIndex from "../../components/BlogIndex.astro";
 import { url } from "../../utils/url";
 
 const slug = decodeSlug(Astro.params.slug);
@@ -17,7 +16,7 @@ const cursor = Astro.url.searchParams.get("cursor") || undefined;
 const { entries: posts, cacheHint, nextCursor } = await getEmDashCollection("posts", {
 	where: { category: term.slug },
 	orderBy: { published_at: "desc" },
-	limit: 20,
+	limit: 12,
 	cursor,
 });
 if (Astro.cache?.enabled) {
@@ -27,9 +26,11 @@ if (Astro.cache?.enabled) {
 ---
 
 <Base title={term.label} description={term.description}>
-	<h1 class="page-title">{term.label}</h1>
-	{term.description && <p class="page-lead">{term.description}</p>}
-	<h2 class="section-label">Filed under {term.label}</h2>
-	{posts.length > 0 ? <PostList posts={posts} /> : <p class="empty">Nothing here yet.</p>}
-	<Pagination basePath={url(`/category/${term.slug}`)} cursor={cursor} nextCursor={nextCursor} />
+	<BlogIndex
+		posts={posts}
+		activeCategory={term.slug}
+		basePath={url(`/category/${term.slug}`)}
+		cursor={cursor}
+		nextCursor={nextCursor}
+	/>
 </Base>

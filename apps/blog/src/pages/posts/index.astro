@@ -1,22 +1,6 @@
 ---
-import { getEmDashCollection } from "emdash";
-import Base from "../../layouts/Base.astro";
-import PostList from "../../components/PostList.astro";
-import Pagination from "../../components/Pagination.astro";
 import { url } from "../../utils/url";
 
-const cursor = Astro.url.searchParams.get("cursor") || undefined;
-const { entries: posts, cacheHint, nextCursor } = await getEmDashCollection("posts", {
-	orderBy: { published_at: "desc" },
-	limit: 20,
-	cursor,
-});
-if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+// The blog home is the post index; this path stays for links and menus.
+return Astro.redirect(url("/"), 301);
 ---
-
-<Base title="Posts">
-	<h1 class="page-title">Posts</h1>
-	<h2 class="section-label">Newest first</h2>
-	{posts.length > 0 ? <PostList posts={posts} /> : <p class="empty">Nothing published yet.</p>}
-	<Pagination basePath={url("/posts")} cursor={cursor} nextCursor={nextCursor} />
-</Base>

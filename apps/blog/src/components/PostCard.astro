@@ -1,0 +1,42 @@
+---
+import { Image } from "emdash/ui";
+import { formatDate } from "../utils/locale";
+import type { PostEntry } from "../utils/post-entry";
+import { url } from "../utils/url";
+
+interface Props {
+	post: PostEntry;
+	category?: { label: string } | null;
+	priority?: boolean;
+}
+
+const { post, category, priority = false } = Astro.props;
+const href = url(`/posts/${post.id}`);
+const publishedAt = post.data.publishedAt ?? null;
+---
+
+<article class="card">
+	{
+		post.data.featured_image && (
+			<a href={href} class="card__media" tabindex="-1" aria-hidden="true" {...post.edit.featured_image}>
+				<Image
+					image={post.data.featured_image}
+					alt=""
+					sizes="(min-width: 980px) 450px, (min-width: 700px) 45vw, 100vw"
+					priority={priority}
+				/>
+			</a>
+		)
+	}
+	<div class="card__body">
+		<p class="meta">
+			{category && <span>{category.label}</span>}
+			{category && publishedAt && " / "}
+			{publishedAt && <time datetime={publishedAt.toISOString()}>{formatDate(publishedAt, "short")}</time>}
+		</p>
+		<h2 class="card__title" {...post.edit.title}>
+			<a href={href}>{post.data.title || "Untitled"}</a>
+		</h2>
+		{post.data.excerpt && <p class="card__excerpt" {...post.edit.excerpt}>{post.data.excerpt}</p>}
+	</div>
+</article>

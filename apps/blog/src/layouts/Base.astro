@@ -1,10 +1,10 @@
 ---
-import { getMenuWithCacheHint, getSiteSettingsWithCacheHint } from "emdash";
+import { getSiteSettingsWithCacheHint } from "emdash";
 import { EmDashHead, EmDashBodyStart, EmDashBodyEnd } from "emdash/ui";
 import { createPublicPageContext } from "emdash/page";
 import { getSiteLocale } from "../utils/locale";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
-import { HOME, url } from "../utils/url";
+import { url } from "../utils/url";
 import "../styles/tokens.css";
 import "../styles/site.css";
 
@@ -36,18 +36,11 @@ const {
 	author,
 	content,
 } = Astro.props;
-const [settingsResult, menuResult] = await Promise.all([
-	getSiteSettingsWithCacheHint(),
-	getMenuWithCacheHint("primary"),
-]);
-if (Astro.cache?.enabled) {
-	Astro.cache.set(settingsResult.cacheHint);
-	Astro.cache.set(menuResult.cacheHint);
-}
+const settingsResult = await getSiteSettingsWithCacheHint();
+if (Astro.cache?.enabled) Astro.cache.set(settingsResult.cacheHint);
 
 const { siteTitle } = resolveBlogSiteIdentity(settingsResult.data);
 const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
-const menuItems = menuResult.data?.items ?? [];
 
 // SEO data is passed here and rendered by EmDashHead
 const pageCtx = createPublicPageContext({
@@ -65,27 +58,7 @@ const pageCtx = createPublicPageContext({
 	siteName: siteTitle,
 });
 
-const TRAILING_SLASH = /\/$/;
-const currentPath = Astro.url.pathname.replace(TRAILING_SLASH, "") || "/";
-const homePath = HOME.replace(TRAILING_SLASH, "") || "/";
-
-/** "page" for the current page, "true" for its parent section (e.g. Posts on a post). */
-function navCurrent(href: string): "page" | "true" | undefined {
-	let target: URL;
-	try {
-		target = new URL(href, Astro.url);
-	} catch {
-		return undefined;
-	}
-	if (target.origin !== Astro.url.origin || target.hash) return undefined;
-	const path = target.pathname.replace(TRAILING_SLASH, "") || "/";
-	if (path === currentPath) return "page";
-	if (path !== homePath && currentPath.startsWith(`${path}/`)) return "true";
-	return undefined;
-}
-
 const lang = getSiteLocale() ?? "en";
-const year = new Date().getFullYear();
 ---
 
 <!doctype html>
@@ -106,38 +79,14 @@ const year = new Date().getFullYear();
 		<EmDashBodyStart page={pageCtx} />
 		<a href="#main" class="skip-link">Skip to content</a>
 		<header class="site-header">
-			<div class="column">
+			<div class="frame">
 				<a href={url("/")} class="wordmark">{siteTitle}</a>
-				{
-					menuItems.length > 0 && (
-						<nav class="site-nav" aria-label="Main">
-							<ul>
-								{menuItems.map((item) => (
-									<li>
-										<a
-											href={item.url}
-											aria-current={navCurrent(item.url)}
-											target={item.target || undefined}
-										>
-											{item.label}
-										</a>
-									</li>
-								))}
-							</ul>
-						</nav>
-					)
-				}
+				<slot name="header-action" />
 			</div>
 		</header>
-		<main id="main" class="column">
+		<main id="main">
 			<slot />
 		</main>
-		<footer class="site-footer">
-			<div class="column">
-				<span>© {year} <a href="https://sabha.co">Sabha</a></span>
-				<span><a href={url("/rss.xml")}>RSS</a> · <a href={url("/search")}>Search</a></span>
-			</div>
-		</footer>
 		<EmDashBodyEnd page={pageCtx} />
 	</body>
 </html>

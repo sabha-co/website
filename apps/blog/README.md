@@ -13,9 +13,12 @@ Open http://localhost:4321/_emdash/admin and complete the setup wizard, which ap
 
 ## Theme
 
-A minimal theme in Sabha's own design: Instrument Sans and JetBrains Mono (self-hosted from `src/assets/fonts`, the same files the app ships), the app's ink and plum tokens in `src/styles/tokens.css`, and the shell in `src/styles/site.css`. Dark mode follows the visitor's system setting. Article typography is `src/styles/prose.css`.
+Structured after [boat.dev/blog](https://boat.dev/blog), in Sabha's own design: Instrument Sans and JetBrains Mono (self-hosted from `src/assets/fonts`, the same files the app ships), the app's ink and plum tokens in `src/styles/tokens.css`, and the shell in `src/styles/site.css`. Dark mode follows the visitor's system setting.
 
-The pages are deliberately small: a home page that leads with the site tagline (edit it in the admin under Settings), plain post lists, and articles. There are no sidebar widgets or comments, so EmDash widget areas and comment settings have no effect here.
+- **Index** (`/blog`, `/blog/category/:slug`, `/blog/tag/:slug`): eyebrow, a large "Blog" title, the site tagline as the lead (edit it in the admin under Settings), category pills, and a two-column grid of square cards with cover images. `/blog/posts` redirects to `/blog`.
+- **Post**: an "All posts" button in the header, a "Blog / Category" breadcrumb, title, date and reading time, a wide cover, then a narrower text column that opens with the excerpt. Quotes render as a boxed callout. Article typography is `src/styles/prose.css`.
+- Posts are meant to have a cover image and one category; the pills list every category, in the order the admin returns them.
+- There are no sidebar widgets, menus or comments, so those admin settings have no effect here.
 
 The admin ships in English only (`admin.locales` in `astro.config.mjs`); each extra language adds to the Worker, which has to stay under the free plan's 3 MB compressed.
 

@@ -76,16 +76,16 @@
 			"collections": ["posts"],
 			"terms": [
 				{
-					"slug": "development",
-					"label": "Development"
+					"slug": "engineering",
+					"label": "Engineering"
 				},
 				{
-					"slug": "design",
-					"label": "Design"
+					"slug": "product",
+					"label": "Product"
 				},
 				{
-					"slug": "notes",
-					"label": "Notes"
+					"slug": "vision",
+					"label": "Vision"
 				}
 			]
 		},
@@ -344,7 +344,7 @@
 					}
 				],
 				"taxonomies": {
-					"category": ["development"],
+					"category": ["engineering"],
 					"tag": ["opinion"]
 				}
 			},
@@ -431,7 +431,7 @@
 					}
 				],
 				"taxonomies": {
-					"category": ["development"],
+					"category": ["engineering"],
 					"tag": ["webdev", "opinion"]
 				}
 			},
@@ -513,7 +513,7 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["notes"],
+					"category": ["vision"],
 					"tag": ["opinion"]
 				}
 			},
@@ -595,7 +595,7 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["development"],
+					"category": ["engineering"],
 					"tag": ["tools"]
 				}
 			},
@@ -677,7 +677,7 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["design"],
+					"category": ["product"],
 					"tag": ["creativity"]
 				}
 			},
@@ -759,7 +759,7 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["development"],
+					"category": ["engineering"],
 					"tag": ["creativity"]
 				}
 			},
@@ -841,7 +841,7 @@
 					]
 				},
 				"taxonomies": {
-					"category": ["notes"],
+					"category": ["vision"],
 					"tag": ["opinion"]
 				}
 			},

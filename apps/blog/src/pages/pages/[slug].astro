@@ -7,6 +7,7 @@ import {
 } from "emdash";
 import { PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
+import { url } from "../../utils/url";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
 import "../../styles/prose.css";
 
@@ -39,11 +40,12 @@ const seo = getSeoMeta(page, {
 	robots={seo.robots}
 	content={{ collection: "pages", id: page.data.id, slug }}
 >
-	<article>
-		<header class="article-header">
-			<h1 class="page-title" {...page.edit.title}>{page.data.title}</h1>
+	<a slot="header-action" class="button" href={url("/")}>All posts</a>
+	<article class="post">
+		<header class="frame frame--post post__header">
+			<h1 class="post__title" {...page.edit.title}>{page.data.title}</h1>
 		</header>
-		<div class="prose" {...page.edit.content}>
+		<div class="frame frame--text prose" {...page.edit.content}>
 			<PortableText value={page.data.content} />
 		</div>
 	</article>

@@ -46,41 +46,44 @@ const countLabel = nextCursor
 ---
 
 <Base title={query ? `Search: ${query}` : "Search"} robots="noindex">
-	<h1 class="page-title">Search</h1>
-	<form class="search-form" method="get" action={url("/search")} role="search">
-		<input
-			type="search"
-			name="q"
-			value={query}
-			placeholder="Search the blog"
-			aria-label="Search the blog"
-			autofocus={!query}
-		/>
-		<button type="submit">Search</button>
-	</form>
-	{
-		query && (
-			<>
-				<h2 class="section-label">{countLabel}</h2>
-				{rows.length > 0 ? (
-					<ul class="post-list">
-						{rows.map((row) => (
-							<li>
-								<h2>
-									{row.titleHtml ? (
-										<a href={row.path} set:html={row.titleHtml} />
-									) : (
-										<a href={row.path}>{row.title}</a>
-									)}
-								</h2>
-								{row.snippet && <p set:html={row.snippet} />}
-							</li>
-						))}
-					</ul>
-				) : (
-					<p class="empty">Nothing matched. Try fewer or different words.</p>
-				)}
-			</>
-		)
-	}
+	<a slot="header-action" class="button" href={url("/")}>All posts</a>
+	<div class="frame frame--text page">
+		<h1 class="post__title">Search</h1>
+		<form class="search-form" method="get" action={url("/search")} role="search">
+			<input
+				type="search"
+				name="q"
+				value={query}
+				placeholder="Search the blog"
+				aria-label="Search the blog"
+				autofocus={!query}
+			/>
+			<button type="submit">Search</button>
+		</form>
+		{
+			query && (
+				<>
+					<h2 class="section-label">{countLabel}</h2>
+					{rows.length > 0 ? (
+						<ul class="post-list">
+							{rows.map((row) => (
+								<li>
+									<h2>
+										{row.titleHtml ? (
+											<a href={row.path} set:html={row.titleHtml} />
+										) : (
+											<a href={row.path}>{row.title}</a>
+										)}
+									</h2>
+									{row.snippet && <p set:html={row.snippet} />}
+								</li>
+							))}
+						</ul>
+					) : (
+						<p class="empty">Nothing matched. Try fewer or different words.</p>
+					)}
+				</>
+			)
+		}
+	</div>
 </Base>
