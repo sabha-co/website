@@ -92,7 +92,7 @@
 
 	/* Inline text */
 	.prose a:where(:not([class*="emdash"])) {
-		color: var(--color-text);
+		color: var(--color-brand);
 		text-decoration-line: underline;
 		text-decoration-thickness: 1px;
 		text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
