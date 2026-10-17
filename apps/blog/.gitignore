@@ -5,9 +5,11 @@ dist
 uploads
 data.db
 data.db-*
+.wrangler
 
-# Environment
+# Environment / Wrangler secrets
 .env
 .env.*
 !.env.example
-data
+.dev.vars
+.dev.vars.*

@@ -1,0 +1,37 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "sabha-blog",
+	"main": "./src/worker.ts",
+	"compatibility_date": "2026-02-24",
+	"compatibility_flags": ["nodejs_compat"],
+	// Only these paths on sabha.co reach the Worker; everything else goes to the
+	// Rails origin. /_emdash is EmDash's admin and API, which ignore Astro's base.
+	"routes": [
+		{ "pattern": "sabha.co/blog", "zone_name": "sabha.co" },
+		{ "pattern": "sabha.co/blog/*", "zone_name": "sabha.co" },
+		{ "pattern": "sabha.co/_emdash/*", "zone_name": "sabha.co" },
+	],
+	// Passkeys are bound to this origin, so run the setup wizard at sabha.co,
+	// never at the workers.dev address.
+	"vars": {
+		"EMDASH_SITE_URL": "https://sabha.co",
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "sabha-blog",
+		},
+	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA",
+			"bucket_name": "sabha-blog-media",
+		},
+	],
+	// Sandboxed plugins require Worker Loader, available on Workers paid plans. Uncomment to enable:
+	// "worker_loaders": [{ "binding": "LOADER" }],
+	// General maintenance cron trigger
+	"triggers": {
+		"crons": ["* * * * *"],
+	},
+}

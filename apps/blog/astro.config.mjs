@@ -1,22 +1,18 @@
-import node from "@astrojs/node";
+import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
+import { d1, r2 } from "@emdash-cms/cloudflare";
 import { defineConfig, fontProviders } from "astro/config";
-import emdash, { local } from "emdash/astro";
-import { sqlite } from "emdash/db";
+import emdash from "emdash/astro";
 
-const dataDir = process.env.DATA_DIR ?? "./data";
-
-// Served at sabha.co/blog behind kamal-proxy, which forwards the /blog prefix
-// unstripped. EmDash keeps its admin and API at the root (/_emdash) whatever
-// the base is, so the proxy routes that prefix here too.
+// Served at sabha.co/blog by Worker routes on the sabha.co zone (wrangler.jsonc);
+// every other path on sabha.co still reaches Rails. EmDash keeps its admin and
+// API at the root (/_emdash) whatever the base is, so that prefix is routed here too.
 export default defineConfig({
-	site: process.env.EMDASH_SITE_URL ?? "http://localhost:4321",
+	site: "https://sabha.co",
 	base: "/blog",
 	trailingSlash: "never",
 	output: "server",
-	adapter: node({
-		mode: "standalone",
-	}),
+	adapter: cloudflare(),
 	image: {
 		layout: "constrained",
 		responsiveStyles: true,
@@ -24,11 +20,8 @@ export default defineConfig({
 	integrations: [
 		react(),
 		emdash({
-			database: sqlite({ url: `file:${dataDir}/emdash.db` }),
-			storage: local({
-				directory: `${dataDir}/uploads`,
-				baseUrl: "/_emdash/api/media/file",
-			}),
+			database: d1({ binding: "DB", session: "auto", coalesce: true }),
+			storage: r2({ binding: "MEDIA" }),
 		}),
 	],
 	fonts: [
