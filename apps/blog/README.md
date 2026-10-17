@@ -28,9 +28,17 @@ pnpm run deploy   # astro build && wrangler deploy
 
 Content changes made in the admin are live straight away and need no deploy. Only code and template changes do.
 
+### Cloudflare account
+
+The Worker, its D1 database and its R2 bucket live in the Cloudflare account that holds the **sabha.co** zone: account ID `bd5b792fe9596c0bb76ce100dd4f2d65`, pinned as `account_id` in `wrangler.jsonc`. It is *not* the account that holds sabha.chat (`1948dc6c…`).
+
+- Sign in with `pnpm wrangler login` as a member of that account, then check with `pnpm wrangler whoami`; it should list the account above. If you were added to the account after your last login, log in again to pick it up.
+- For one-off commands elsewhere, set `CLOUDFLARE_ACCOUNT_ID=bd5b792fe9596c0bb76ce100dd4f2d65`.
+- In the dashboard, switch to that account, then open Workers & Pages → `sabha-blog`, D1 → `sabha-blog`, or R2 → `sabha-blog-media`.
+
 First-time setup:
 
-1. `pnpm wrangler login`, with the Cloudflare account that holds the sabha.co zone.
+1. `pnpm wrangler login` (see above).
 2. Generate the key with `npx emdash secrets generate`, then `pnpm wrangler secret put EMDASH_ENCRYPTION_KEY`. Keep a copy somewhere safe: plugin secrets can't be read back without it, and D1 backups don't include it.
 3. `pnpm run deploy`. The first deploy creates the `sabha-blog` D1 database and the `sabha-blog-media` R2 bucket, and attaches the routes.
 4. Complete the setup wizard at https://sabha.co/_emdash/admin. Passkeys are bound to `EMDASH_SITE_URL` (https://sabha.co), so never run setup at the workers.dev address.
