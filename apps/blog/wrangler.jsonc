@@ -2,7 +2,7 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "sabha-blog",
 	// The account that holds the sabha.co zone.
-	"account_id": "bd5b792fe9596c0bb76ce100dd4f2d65",
+	"account_id": "1948dc6c405b77891f2b25bc1018fefd",
 	"main": "./src/worker.ts",
 	"compatibility_date": "2026-02-24",
 	"compatibility_flags": ["nodejs_compat"],
