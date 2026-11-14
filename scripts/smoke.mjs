@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Checks one app's claimed paths on a host: each answers with a good status
-// and the security headers, and the paths Rails keeps still come from Rails.
+// and the security headers, so do their query-string and trailing-slash forms,
+// and the paths Rails keeps still come from Rails.
 //
 //   node scripts/smoke.mjs --app docs [--base https://next.sabha.co] [--tenant 1000001]
 
@@ -36,6 +37,17 @@ const OK_STATUS = (path, response) => {
   return location !== null && new URL(location, "https://x").pathname === EXPECTED_REDIRECTS[path];
 };
 
+// Links in the wild carry campaign tags or a trailing slash. Route matching
+// includes the query string, so these reach the Worker only if its routes end
+// in "*" (or, for bare "/", through the zone's rewrite rule). A redirect to the
+// clean path counts as answered.
+export function linkVariants(path) {
+  const variants = [`${path}?utm_source=smoke`];
+  const isPage = path !== "/" && !path.endsWith("/") && !/\.\w+$/.test(path) && !path.startsWith("/_emdash");
+  if (isPage) variants.push(`${path}/`);
+  return variants;
+}
+
 export async function smoke({ app, base = "https://next.sabha.co", tenant, fetch = globalThis.fetch }) {
   const paths = CLAIMED_PATHS[app];
   if (!paths) throw new Error(`Unknown app "${app}"; expected one of ${Object.keys(CLAIMED_PATHS).join(", ")}`);
@@ -53,6 +65,12 @@ export async function smoke({ app, base = "https://next.sabha.co", tenant, fetch
       if (!value) failures.push(`${path}: missing ${name}`);
       else if (!pattern.test(value)) failures.push(`${path}: ${name} is "${value}"`);
     }
+  }
+
+  for (const variant of paths.flatMap(linkVariants)) {
+    const response = await get(variant, { "user-agent": "sabha-website-smoke" });
+    if (response.headers.has(RAILS_MARKER)) failures.push(`${variant}: answered by Rails, not the ${app} Worker`);
+    else if (response.status >= 400) failures.push(`${variant}: status ${response.status}`);
   }
 
   const railsPaths = ["/session/new", "/up", ...(tenant ? [`/${tenant}`] : [])];

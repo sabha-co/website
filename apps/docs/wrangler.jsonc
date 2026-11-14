@@ -14,9 +14,7 @@
 		"not_found_handling": "404-page",
 	},
 	// Only /docs reaches this Worker; everything else on the host goes to
-	// Rails. "/docs/*" doesn't match the bare "/docs", so both.
-	"routes": [
-		{ "pattern": "next.sabha.co/docs", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/docs/*", "zone_name": "sabha.co" },
-	],
+	// Rails. "/docs*" rather than "/docs/*": it also matches the bare "/docs"
+	// and "/docs?query" (route matching includes the query string).
+	"routes": [{ "pattern": "next.sabha.co/docs*", "zone_name": "sabha.co" }],
 }

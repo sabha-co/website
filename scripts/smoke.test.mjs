@@ -33,7 +33,7 @@ test("fails when a claimed path is missing", async () => {
     app: "docs",
     fetch: fakeHost({ worker: (path) => ({ status: path === "/docs/llms.txt" ? 404 : 200, headers: SECURE }) }),
   });
-  assert.deepEqual(failures, ["/docs/llms.txt: status 404"]);
+  assert.deepEqual(failures, ["/docs/llms.txt: status 404", "/docs/llms.txt?utm_source=smoke: status 404"]);
 });
 
 test("fails when a security header is missing or weak", async () => {
@@ -66,7 +66,25 @@ test("fails when Rails still answers a claimed path", async () => {
     app: "docs",
     fetch: fakeHost({ worker: (path) => ({ status: 200, headers: path === "/docs" ? { ...SECURE, "x-request-id": "abc" } : SECURE }) }),
   });
-  assert.deepEqual(failures, ["/docs: answered by Rails, not the docs Worker"]);
+  assert.deepEqual(failures, [
+    "/docs: answered by Rails, not the docs Worker",
+    "/docs?utm_source=smoke: answered by Rails, not the docs Worker",
+  ]);
+});
+
+test("fails when a link's query-string or trailing-slash form still reaches Rails", async () => {
+  const failures = await smoke({
+    app: "marketing",
+    fetch: async (url) => {
+      const { pathname, search } = new URL(url);
+      const rails = RAILS_PATHS.has(pathname) || (pathname === "/about" && search !== "") || pathname === "/terms/";
+      return new Response(null, { status: 200, headers: rails ? { "x-request-id": "abc" } : SECURE });
+    },
+  });
+  assert.deepEqual(failures, [
+    "/about?utm_source=smoke: answered by Rails, not the marketing Worker",
+    "/terms/: answered by Rails, not the marketing Worker",
+  ]);
 });
 
 test("accepts the admin's redirect to its sign-in and /docs to /docs/, but no other redirect", async () => {
