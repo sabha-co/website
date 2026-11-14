@@ -1,0 +1,66 @@
+---
+title: Install and push notifications
+description: Install Sabha as an app on your phone or computer and get push notifications, no app store needed.
+sidebar:
+  order: 33
+  label: Push notifications
+---
+
+Sabha installs straight from your browser, like a regular app, on phones, tablets and computers. Once installed, it gets its own icon and window, push notifications and a badge with your unread count.
+
+## Install Sabha
+
+Open your workspace in your browser and look for Sabha's install prompt. It shows the steps for your browser and device. You can also use your browser's own install option, such as **Install app** in Chrome or Edge.
+
+### iPhone and iPad
+
+On iOS, push notifications only work once Sabha is installed:
+
+1. Open your workspace in Safari.
+2. Tap **Share**, then **Add to Home Screen**.
+3. Open Sabha from your home screen.
+4. Turn on notifications from inside the installed app.
+
+If you try to turn on notifications in Safari first, Sabha shows you these steps.
+
+## Turn on push notifications
+
+When you turn notifications on, your browser asks for permission. Allow it, and Sabha starts sending pushes to that device. You can turn push off for all your devices with **Push notifications** in your notification preferences.
+
+What you're notified about depends on each room's notification level. See [Notifications](/features/notifications/).
+
+## What a notification looks like
+
+- **Direct messages** show the sender's name and their message.
+- **Rooms** show the room's name, then the sender's name and message.
+- **Thread replies** link back to the message the thread started from.
+
+Clicking a notification opens the conversation, in a Sabha window that's already open if you have one.
+
+You won't get a push for a room you're looking at right now.
+
+## Badge
+
+The installed app's icon shows how many rooms have unread messages, where your device supports app badges.
+
+## Offline
+
+If your connection drops, the installed app shows an offline page instead of a browser error, and picks up again when you're back online.
+
+## For administrators: setting up push
+
+Push notifications need a VAPID key pair, which lets your server prove its identity to the browsers' push services. Generate one:
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+Set the two keys as `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` and deploy. See [Deploy Sabha](/self-hosting/deploy/#configuration). Sabha gives `SUPPORT_EMAIL` to the push services as your contact address.
+
+<Aside type="caution" title="Keep the keys stable">
+  Each device's subscription is tied to your public key. If you change the keys, everyone needs to turn push notifications on again.
+</Aside>
+
+To skip pushes for a room someone is already looking at, Sabha asks its WebSocket server, AnyCable, who's online. This needs AnyCable-Go 1.6.9 or newer. If Sabha can't reach AnyCable, it falls back to a rougher check, and someone who was online in the last few minutes may miss a push.
+
+The installed app takes its name, short name, description and colors from your [branding settings](/self-hosting/branding/).
