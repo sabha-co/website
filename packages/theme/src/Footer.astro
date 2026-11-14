@@ -48,9 +48,9 @@ const year = new Date().getFullYear();
     display: flex;
     flex-direction: column;
     gap: 3rem;
-    max-width: 70rem;
+    max-width: var(--site-max);
     margin: 0 auto;
-    padding: 0 5rem;
+    padding: 0 var(--site-pad);
     box-sizing: content-box;
   }
 
@@ -124,10 +124,6 @@ const year = new Date().getFullYear();
   }
 
   @media (max-width: 1024px) {
-    .site-footer-inner {
-      padding-inline: 2.5rem;
-    }
-
     .site-footer-cols {
       gap: 2.5rem;
     }
@@ -136,10 +132,6 @@ const year = new Date().getFullYear();
   @media (max-width: 834px) {
     .site-footer {
       padding: 2.5rem 0;
-    }
-
-    .site-footer-inner {
-      padding-inline: var(--gutter);
     }
 
     .site-footer-top,

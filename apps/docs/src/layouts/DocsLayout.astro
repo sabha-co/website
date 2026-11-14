@@ -106,13 +106,13 @@ const showToc = headings !== false && (hasToc || headings.length > 0);
         <slot />
       </main>
     ) : (
-      <div class="flex-1 mx-auto w-full">
+      <div class="flex-1 site-column">
         <div class="flex">
           {/* The page's content comes first in source order, so agents and
               text readers reach it before the sidebar; `order-first` keeps
               the sidebar on the left. */}
           <main id="main-content" tabindex="-1" transition:name="nb-content" class="flex-1 min-w-0">
-            <div class="mx-auto max-w-(--nb-content-max) px-4 md:px-6 pt-6 pb-12">
+            <div class="mx-auto max-w-(--nb-content-max) md:px-6 pt-6 pb-12">
               {versionStatus?.isDeprecated && (
                 <Banner
                   variant="caution"
@@ -181,8 +181,12 @@ const showToc = headings !== false && (hasToc || headings.length > 0);
             </div>
           </main>
 
+          {/* Pulled 1.75rem (the nav's and items' padding) into the column's
+              side padding, so item text lines up under "Docs" and the
+              highlight hangs outside it. Phones and small tablets have only a
+              16px side padding, too little to hang into. */}
           {showSidebar && (
-            <aside id="desktop-sidebar" aria-label="Sidebar" data-nb-desktop-sidebar class="order-first hidden md:flex w-60 lg:w-(--nb-sidebar-width) shrink-0 border-e border-border bg-background sticky top-14 h-[calc(100vh-3.5rem)] flex-col relative">
+            <aside id="desktop-sidebar" aria-label="Sidebar" data-nb-desktop-sidebar class="order-first hidden md:flex min-[835px]:-ms-7 w-60 lg:w-(--nb-sidebar-width) shrink-0 border-e border-border bg-background sticky top-14 h-[calc(100vh-3.5rem)] flex-col relative">
               {/* One tree per page: this node moves into the mobile drawer
                   while it is open and comes back on close. It owns the
                   scroll, so open-group and scroll state follow it. */}

@@ -66,6 +66,10 @@
     --leading-snug: 1.3;
     --leading-normal: 1.5;
 
+    /* The page column every site's header, footer and docs share. */
+    --site-max: 70rem;
+    --site-pad: 5rem;
+
     /* Shape and motion */
     --gutter: 16px;
     --line: 1.5px;
@@ -73,6 +77,18 @@
     --radius-lg: 8px;
     --radius-full: 999px;
     --ease: 140ms ease;
+  }
+
+  @media (max-width: 1024px) {
+    :root {
+      --site-pad: 2.5rem;
+    }
+  }
+
+  @media (max-width: 834px) {
+    :root {
+      --site-pad: var(--gutter);
+    }
   }
 
   /* Browsers without light-dark() (Safari < 17.5) get the light values. */

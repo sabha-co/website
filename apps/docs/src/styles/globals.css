@@ -662,6 +662,21 @@ pre.astro-code .highlighted-word {
    group's list its `details > ul`. The `.nb-sidebar-*` classes still work for
    a row placed elsewhere. In the components layer so Tailwind utilities on a
    row (a `line-through`) still win. */
+/* The site header's column (@sabha/theme tokens), so the docs bar, sidebar,
+   page and contents line up under it instead of running edge to edge. */
+/* Three columns need more room than the marketing pages' 70rem: the docs
+   widen the shared column, and the site header follows it. */
+:root {
+	--site-max: 84rem;
+}
+
+@utility site-column {
+	width: 100%;
+	max-width: calc(var(--site-max) + 2 * var(--site-pad));
+	margin-inline: auto;
+	padding-inline: var(--site-pad);
+}
+
 @layer components {
 	:is(.nb-sidebar-link, :is([data-nb-sidebar], [data-nb-api-nav], [data-nb-nav-results]) li > a),
 	:is(.nb-sidebar-row, :is([data-nb-sidebar], [data-nb-api-nav]) details > summary) {
