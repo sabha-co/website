@@ -50,9 +50,9 @@ import { headerNav, SIGN_IN_PATH, SIGN_UP_PATH } from "./site";
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 70rem;
+    max-width: var(--site-max);
     margin: 0 auto;
-    padding: 1.25rem 5rem;
+    padding: 1.25rem var(--site-pad);
     box-sizing: content-box;
   }
 
@@ -194,17 +194,7 @@ import { headerNav, SIGN_IN_PATH, SIGN_UP_PATH } from "./site";
     color: var(--sabha-color-bg);
   }
 
-  @media (max-width: 1024px) {
-    .site-nav {
-      padding-inline: 2.5rem;
-    }
-  }
-
   @media (max-width: 834px) {
-    .site-nav {
-      padding-inline: var(--gutter);
-    }
-
     .site-links,
     .site-actions {
       display: none;
