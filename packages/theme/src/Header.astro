@@ -1,0 +1,217 @@
+---
+import Wordmark from "./Wordmark.astro";
+import { headerNav, SIGN_IN_PATH, SIGN_UP_PATH } from "./site";
+
+// The phone menu is a popover: outside clicks and Escape close it with no
+// script, so the sites' CSP needs no inline-script allowance for it.
+---
+
+<header class="site-header">
+  <nav class="site-nav" aria-label="Main">
+    <a href="/" class="site-home"><Wordmark /></a>
+
+    <div class="site-links">
+      {headerNav.map((link) => (
+        <a href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noopener" : undefined}>
+          {link.label}
+        </a>
+      ))}
+    </div>
+
+    <div class="site-actions">
+      <a href={SIGN_IN_PATH} class="site-sign-in">Sign in</a>
+      <a href={SIGN_UP_PATH} class="site-sign-up">Create your community</a>
+    </div>
+
+    <button class="site-menu-toggle" popovertarget="site-menu" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+    </button>
+
+    <div id="site-menu" class="site-menu" popover>
+      {headerNav.map((link) => (
+        <a href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noopener" : undefined}>
+          {link.label}
+        </a>
+      ))}
+      <hr />
+      <a href={SIGN_IN_PATH} class="site-sign-in">Sign in</a>
+      <a href={SIGN_UP_PATH} class="site-sign-up">Create your community</a>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    background: var(--color-bg);
+    font-family: var(--font-body);
+  }
+
+  .site-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 1.25rem 5rem;
+    box-sizing: content-box;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .site-home {
+    display: flex;
+    color: var(--color-text);
+  }
+
+  .site-links {
+    display: flex;
+    gap: 2.25rem;
+    align-items: center;
+  }
+
+  .site-links a {
+    position: relative;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    transition: color var(--ease);
+  }
+
+  .site-links a::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--color-text);
+    transition: width 0.25s ease;
+  }
+
+  .site-links a:hover {
+    color: var(--color-text);
+  }
+
+  .site-links a:hover::after {
+    width: 100%;
+  }
+
+  .site-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .site-sign-in {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .site-sign-up {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    transition: opacity var(--ease);
+  }
+
+  .site-sign-up:hover {
+    opacity: 0.85;
+  }
+
+  a:focus-visible,
+  .site-menu-toggle:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .site-menu-toggle {
+    display: none;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: none;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .site-menu {
+    inset: 4.75rem var(--gutter) auto;
+    width: auto;
+    margin: 0;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+  }
+
+  .site-menu:popover-open {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .site-menu a {
+    padding: 0.625rem 0;
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+  }
+
+  .site-menu hr {
+    width: 100%;
+    height: 1px;
+    margin: 0;
+    border: 0;
+    background: var(--color-border);
+  }
+
+  .site-menu .site-sign-in,
+  .site-menu .site-sign-up {
+    display: flex;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+  }
+
+  .site-menu .site-sign-in {
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+
+  .site-menu .site-sign-up {
+    color: var(--color-bg);
+  }
+
+  @media (max-width: 1024px) {
+    .site-nav {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  @media (max-width: 834px) {
+    .site-nav {
+      padding-inline: var(--gutter);
+    }
+
+    .site-links,
+    .site-actions {
+      display: none;
+    }
+
+    .site-menu-toggle {
+      display: block;
+    }
+  }
+</style>

@@ -1,0 +1,32 @@
+---
+// The "sabha" wordmark with its red dot, drawn in the current text color so
+// it reads in dark mode (the app's sabha-logo.svg hard-codes #202124).
+interface Props {
+  size?: "regular" | "small";
+}
+const { size = "regular" } = Astro.props;
+---
+
+<svg
+  class:list={["wordmark", size]}
+  viewBox="0 0 140 60"
+  role="img"
+  aria-label="Sabha"
+>
+  <text x="10" y="45" font-weight="700" font-size="42" letter-spacing="-1.5" fill="currentColor">sabha</text>
+  <circle cx="130" cy="18" r="6" fill="#FF3B30"></circle>
+</svg>
+
+<style>
+  .wordmark {
+    display: block;
+    height: 3rem;
+    width: auto;
+    font-family: var(--font-body);
+  }
+
+  .small {
+    height: 2.5rem;
+    margin-left: -0.5rem;
+  }
+</style>

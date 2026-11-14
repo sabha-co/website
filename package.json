@@ -1,0 +1,14 @@
+{
+  "name": "sabha-website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "test": "node --test 'scripts/*.test.mjs' && pnpm -r --if-present test",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@12.18.0"
+}

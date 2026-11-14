@@ -1,0 +1,76 @@
+#!/usr/bin/env node
+// Checks one app's claimed paths on a host: each answers with a good status
+// and the security headers, and the paths Rails keeps still come from Rails.
+//
+//   node scripts/smoke.mjs --app docs [--base https://next.sabha.co] [--tenant 1000001]
+
+import { parseArgs } from "node:util";
+import { pathToFileURL } from "node:url";
+
+export const CLAIMED_PATHS = {
+  marketing: ["/", "/about", "/changelog", "/terms", "/privacy", "/openclaw", "/robots.txt", "/sitemap.xml", "/llms.txt"],
+  docs: ["/docs", "/docs/", "/docs/llms.txt"],
+  blog: ["/blog", "/blog/sitemap.xml", "/_emdash"],
+};
+
+export const SECURITY_HEADERS = {
+  "content-security-policy": /frame-ancestors 'none'/,
+  "x-content-type-options": /^nosniff$/i,
+  "strict-transport-security": /max-age=\d+/,
+  "referrer-policy": /\S/,
+};
+
+// Rails' ActionDispatch::RequestId stamps every response; Workers never do.
+const RAILS_MARKER = "x-request-id";
+
+// The admin redirects to its sign-in, so a redirect is a pass there.
+const OK_STATUS = (path, status) =>
+  status >= 200 && status < 300 || (path.startsWith("/_emdash") && status >= 300 && status < 400);
+
+export async function smoke({ app, base = "https://next.sabha.co", tenant, fetch = globalThis.fetch }) {
+  const paths = CLAIMED_PATHS[app];
+  if (!paths) throw new Error(`Unknown app "${app}"; expected one of ${Object.keys(CLAIMED_PATHS).join(", ")}`);
+
+  const failures = [];
+  const get = (path, headers = {}) => fetch(new URL(path, base), { redirect: "manual", headers });
+
+  for (const path of paths) {
+    const response = await get(path, { "user-agent": "sabha-website-smoke" });
+    if (!OK_STATUS(path, response.status)) failures.push(`${path}: status ${response.status}`);
+    if (response.headers.has(RAILS_MARKER)) failures.push(`${path}: answered by Rails, not the ${app} Worker`);
+
+    for (const [name, pattern] of Object.entries(SECURITY_HEADERS)) {
+      const value = response.headers.get(name);
+      if (!value) failures.push(`${path}: missing ${name}`);
+      else if (!pattern.test(value)) failures.push(`${path}: ${name} is "${value}"`);
+    }
+  }
+
+  const railsPaths = ["/session/new", "/up", ...(tenant ? [`/${tenant}`] : [])];
+  for (const path of railsPaths) {
+    const response = await get(path);
+    if (!response.headers.has(RAILS_MARKER)) failures.push(`${path}: not answered by Rails`);
+  }
+
+  return failures;
+}
+
+async function main() {
+  const { values } = parseArgs({
+    options: {
+      app: { type: "string" },
+      base: { type: "string", default: "https://next.sabha.co" },
+      tenant: { type: "string" },
+    },
+  });
+
+  const failures = await smoke(values);
+  if (failures.length) {
+    console.error(`Smoke failed for ${values.app} on ${values.base}:`);
+    for (const failure of failures) console.error(`  - ${failure}`);
+    process.exit(1);
+  }
+  console.log(`Smoke passed for ${values.app} on ${values.base}.`);
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) await main();

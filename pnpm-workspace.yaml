@@ -1,0 +1,26 @@
+packages:
+  - apps/*
+  - packages/*
+
+# One Astro and one Wrangler across every app: each app depends on them as
+# "catalog:".
+catalog:
+  astro: 7.4.11
+  "@astrojs/cloudflare": 14.4.8
+  wrangler: 4.162.0
+
+# Build scripts: allow only what each runtime needs; rest false so
+# strictDepBuilds passes. One allowance covers every app.
+allowBuilds:
+  esbuild: true
+  workerd: true
+  sharp: false
+
+# Supply-chain hardening: cooldown on brand-new releases (EmDash exempt)
+# and no non-registry transitive sources. (No trustPolicy: no-downgrade --
+# it trips on upstream provenance regressions we don't control.)
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - emdash
+  - "@emdash-cms/*"
+blockExoticSubdeps: true

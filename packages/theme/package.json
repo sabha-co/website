@@ -1,0 +1,23 @@
+{
+  "name": "@sabha/theme",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./site": "./src/site.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./fonts.css": "./src/fonts.css",
+    "./Header.astro": "./src/Header.astro",
+    "./Footer.astro": "./src/Footer.astro",
+    "./Wordmark.astro": "./src/Wordmark.astro"
+  },
+  "peerDependencies": {
+    "astro": "catalog:"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "devDependencies": {
+    "astro": "catalog:",
+    "@sabha/theme": "workspace:*"
+  }
+}
