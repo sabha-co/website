@@ -12,23 +12,43 @@
     color-scheme: light dark;
 
     /* Colors */
-    --color-bg: light-dark(oklch(100% 0 0), oklch(19.6% 0.008 274));
-    --color-surface: var(--color-bg);
-    --color-fill: light-dark(oklch(97.2% 0.003 265), oklch(23.5% 0.01 272));
-    --color-fill-strong: light-dark(oklch(94.5% 0.005 265), oklch(27% 0.011 271));
-    --color-bg-subtle: var(--color-fill);
-    --color-text: light-dark(oklch(20.4% 0.007 258), oklch(95.2% 0.006 265));
-    --color-text-secondary: light-dark(oklch(33.9% 0.014 257), oklch(84% 0.01 262));
-    --color-muted: light-dark(oklch(50.4% 0.018 257), oklch(70.3% 0.018 256));
-    --color-border: light-dark(oklch(93% 0.005 268), oklch(28% 0.012 271));
-    --color-border-subtle: light-dark(oklch(95.8% 0.004 271), oklch(25.7% 0.012 271));
-    --color-border-strong: light-dark(oklch(87% 0.008 266), oklch(35% 0.013 271));
-    --color-media-outline: light-dark(oklch(0% 0 0 / 0.08), oklch(100% 0 0 / 0.08));
-    --color-brand: light-dark(oklch(47.7% 0.138 317), oklch(71.8% 0.11 317));
-    --color-brand-hover: light-dark(oklch(40% 0.13 317), oklch(78% 0.09 317));
-    --color-brand-tint: light-dark(oklch(97% 0.015 317), oklch(26% 0.03 317));
-    --color-on-brand: light-dark(oklch(100% 0 0), oklch(19.6% 0.008 274));
-    --color-line: light-dark(oklch(90% 0.005 265), oklch(32% 0.012 271));
+    --sabha-color-bg: light-dark(oklch(100% 0 0), oklch(19.6% 0.008 274));
+    --sabha-color-surface: var(--sabha-color-bg);
+    --sabha-color-fill: light-dark(oklch(97.2% 0.003 265), oklch(23.5% 0.01 272));
+    --sabha-color-fill-strong: light-dark(oklch(94.5% 0.005 265), oklch(27% 0.011 271));
+    --sabha-color-bg-subtle: var(--sabha-color-fill);
+    --sabha-color-text: light-dark(oklch(20.4% 0.007 258), oklch(95.2% 0.006 265));
+    --sabha-color-text-secondary: light-dark(oklch(33.9% 0.014 257), oklch(84% 0.01 262));
+    --sabha-color-muted: light-dark(oklch(50.4% 0.018 257), oklch(70.3% 0.018 256));
+    --sabha-color-border: light-dark(oklch(93% 0.005 268), oklch(28% 0.012 271));
+    --sabha-color-border-subtle: light-dark(oklch(95.8% 0.004 271), oklch(25.7% 0.012 271));
+    --sabha-color-border-strong: light-dark(oklch(87% 0.008 266), oklch(35% 0.013 271));
+    --sabha-color-media-outline: light-dark(oklch(0% 0 0 / 0.08), oklch(100% 0 0 / 0.08));
+    --sabha-color-brand: light-dark(oklch(47.7% 0.138 317), oklch(71.8% 0.11 317));
+    --sabha-color-brand-hover: light-dark(oklch(40% 0.13 317), oklch(78% 0.09 317));
+    --sabha-color-brand-tint: light-dark(oklch(97% 0.015 317), oklch(26% 0.03 317));
+    --sabha-color-on-brand: light-dark(oklch(100% 0 0), oklch(19.6% 0.008 274));
+    --sabha-color-line: light-dark(oklch(90% 0.005 265), oklch(32% 0.012 271));
+
+    /* The names the sites read. Sources are --sabha-color-*, so a site whose
+       framework claims --color-* (Tailwind, in the docs) can still reach them. */
+    --color-bg: var(--sabha-color-bg);
+    --color-surface: var(--sabha-color-surface);
+    --color-fill: var(--sabha-color-fill);
+    --color-fill-strong: var(--sabha-color-fill-strong);
+    --color-bg-subtle: var(--sabha-color-bg-subtle);
+    --color-text: var(--sabha-color-text);
+    --color-text-secondary: var(--sabha-color-text-secondary);
+    --color-muted: var(--sabha-color-muted);
+    --color-border: var(--sabha-color-border);
+    --color-border-subtle: var(--sabha-color-border-subtle);
+    --color-border-strong: var(--sabha-color-border-strong);
+    --color-media-outline: var(--sabha-color-media-outline);
+    --color-brand: var(--sabha-color-brand);
+    --color-brand-hover: var(--sabha-color-brand-hover);
+    --color-brand-tint: var(--sabha-color-brand-tint);
+    --color-on-brand: var(--sabha-color-on-brand);
+    --color-line: var(--sabha-color-line);
 
     /* Type */
     --font-body:
@@ -59,21 +79,21 @@
   @supports not (color: light-dark(#000, #fff)) {
     :root {
       color-scheme: light;
-      --color-bg: oklch(100% 0 0);
-      --color-fill: oklch(97.2% 0.003 265);
-      --color-fill-strong: oklch(94.5% 0.005 265);
-      --color-text: oklch(20.4% 0.007 258);
-      --color-text-secondary: oklch(33.9% 0.014 257);
-      --color-muted: oklch(50.4% 0.018 257);
-      --color-border: oklch(93% 0.005 268);
-      --color-border-subtle: oklch(95.8% 0.004 271);
-      --color-border-strong: oklch(87% 0.008 266);
-      --color-media-outline: oklch(0% 0 0 / 0.08);
-      --color-brand: oklch(47.7% 0.138 317);
-      --color-brand-hover: oklch(40% 0.13 317);
-      --color-brand-tint: oklch(97% 0.015 317);
-      --color-on-brand: oklch(100% 0 0);
-      --color-line: oklch(90% 0.005 265);
+      --sabha-color-bg: oklch(100% 0 0);
+      --sabha-color-fill: oklch(97.2% 0.003 265);
+      --sabha-color-fill-strong: oklch(94.5% 0.005 265);
+      --sabha-color-text: oklch(20.4% 0.007 258);
+      --sabha-color-text-secondary: oklch(33.9% 0.014 257);
+      --sabha-color-muted: oklch(50.4% 0.018 257);
+      --sabha-color-border: oklch(93% 0.005 268);
+      --sabha-color-border-subtle: oklch(95.8% 0.004 271);
+      --sabha-color-border-strong: oklch(87% 0.008 266);
+      --sabha-color-media-outline: oklch(0% 0 0 / 0.08);
+      --sabha-color-brand: oklch(47.7% 0.138 317);
+      --sabha-color-brand-hover: oklch(40% 0.13 317);
+      --sabha-color-brand-tint: oklch(97% 0.015 317);
+      --sabha-color-on-brand: oklch(100% 0 0);
+      --sabha-color-line: oklch(90% 0.005 265);
     }
   }
 }

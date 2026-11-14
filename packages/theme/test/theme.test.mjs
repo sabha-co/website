@@ -42,5 +42,5 @@ test("tokens carry dark values for system dark mode", () => {
   const { assets, outDir } = build();
   const css = assets.filter((name) => name.endsWith(".css")).map((name) => readFileSync(join(outDir, "_astro", name), "utf8")).join("");
   assert.match(css, /color-scheme:\s*light dark/);
-  assert.match(css, /--color-bg:\s*light-dark\(oklch\(100% 0 0\),\s*oklch\(19\.6% 0?\.008 274\)\)/);
+  assert.match(css, /--sabha-color-bg:\s*light-dark\(oklch\(100% 0 0\),\s*oklch\(19\.6% 0?\.008 274\)\)/);
 });

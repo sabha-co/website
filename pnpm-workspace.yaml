@@ -9,6 +9,12 @@ catalog:
   "@astrojs/cloudflare": 14.4.7
   wrangler: 4.161.0
 
+# The docs search (Pagefind) ships a wasm32 build.
+supportedArchitectures:
+  cpu:
+    - current
+    - wasm32
+
 # Build scripts: allow only what each runtime needs; rest false so
 # strictDepBuilds passes. One allowance covers every app.
 allowBuilds:

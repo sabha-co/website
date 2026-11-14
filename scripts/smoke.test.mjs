@@ -69,10 +69,20 @@ test("fails when Rails still answers a claimed path", async () => {
   assert.deepEqual(failures, ["/docs: answered by Rails, not the docs Worker"]);
 });
 
-test("accepts the admin's redirect to its sign-in", async () => {
-  const failures = await smoke({
+test("accepts the admin's redirect to its sign-in and /docs to /docs/, but no other redirect", async () => {
+  const blog = await smoke({
     app: "blog",
     fetch: fakeHost({ worker: (path) => ({ status: path === "/_emdash/admin" ? 302 : 200, headers: SECURE }) }),
   });
-  assert.deepEqual(failures, []);
+  assert.deepEqual(blog, []);
+
+  const docs = (location) =>
+    smoke({
+      app: "docs",
+      fetch: fakeHost({
+        worker: (path) => (path === "/docs" ? { status: 307, headers: { ...SECURE, location } } : { status: 200, headers: SECURE }),
+      }),
+    });
+  assert.deepEqual(await docs("/docs/"), []);
+  assert.deepEqual(await docs("/session/new"), ["/docs: status 307"]);
 });
