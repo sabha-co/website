@@ -10,7 +10,7 @@ import { pathToFileURL } from "node:url";
 export const CLAIMED_PATHS = {
   marketing: ["/", "/about", "/changelog", "/terms", "/privacy", "/openclaw", "/robots.txt", "/sitemap.xml", "/llms.txt"],
   docs: ["/docs", "/docs/", "/docs/llms.txt"],
-  blog: ["/blog", "/blog/sitemap.xml", "/_emdash"],
+  blog: ["/blog", "/blog/sitemap.xml", "/blog/rss.xml", "/_emdash/admin"],
 };
 
 export const SECURITY_HEADERS = {
@@ -23,7 +23,7 @@ export const SECURITY_HEADERS = {
 // Rails' ActionDispatch::RequestId stamps every response; Workers never do.
 const RAILS_MARKER = "x-request-id";
 
-// The admin redirects to its sign-in, so a redirect is a pass there.
+// The admin redirects to its sign-in (or setup), so a redirect is a pass there.
 const OK_STATUS = (path, status) =>
   status >= 200 && status < 300 || (path.startsWith("/_emdash") && status >= 300 && status < 400);
 

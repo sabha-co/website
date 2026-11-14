@@ -3,12 +3,13 @@ import react from "@astrojs/react";
 import { d1, r2 } from "@emdash-cms/cloudflare";
 import { defineConfig } from "astro/config";
 import emdash from "emdash/astro";
+import { SITE_URL } from "@sabha/theme/site";
 
-// Served at sabha.co/blog by Worker routes on the sabha.co zone (wrangler.jsonc);
-// every other path on sabha.co still reaches Rails. EmDash keeps its admin and
-// API at the root (/_emdash) whatever the base is, so that prefix is routed here too.
+// Served at /blog by Worker routes (wrangler.jsonc); every other path on the
+// host still reaches Rails. EmDash keeps its admin and API at the root
+// (/_emdash) whatever the base is, so that prefix is routed here too.
 export default defineConfig({
-	site: "https://sabha.co",
+	site: SITE_URL,
 	base: "/blog",
 	trailingSlash: "never",
 	output: "server",

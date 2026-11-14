@@ -1,0 +1,7 @@
+# Static assets skip the Worker, so they carry the headers here
+# (src/security-headers.ts sets them on everything the Worker renders).
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'none'; frame-ancestors 'none'

@@ -72,7 +72,7 @@ test("fails when Rails still answers a claimed path", async () => {
 test("accepts the admin's redirect to its sign-in", async () => {
   const failures = await smoke({
     app: "blog",
-    fetch: fakeHost({ worker: (path) => ({ status: path === "/_emdash" ? 302 : 200, headers: SECURE }) }),
+    fetch: fakeHost({ worker: (path) => ({ status: path === "/_emdash/admin" ? 302 : 200, headers: SECURE }) }),
   });
   assert.deepEqual(failures, []);
 });

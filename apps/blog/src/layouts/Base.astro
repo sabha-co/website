@@ -5,6 +5,8 @@ import { createPublicPageContext } from "emdash/page";
 import { getSiteLocale } from "../utils/locale";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 import { url } from "../utils/url";
+import Header from "@sabha/theme/Header.astro";
+import Footer from "@sabha/theme/Footer.astro";
 import "../styles/tokens.css";
 import "../styles/site.css";
 
@@ -78,15 +80,17 @@ const lang = getSiteLocale() ?? "en";
 	<body>
 		<EmDashBodyStart page={pageCtx} />
 		<a href="#main" class="skip-link">Skip to content</a>
-		<header class="site-header">
+		<Header />
+		<div class="blog-header">
 			<div class="frame">
-				<a href={url("/")} class="wordmark">{siteTitle}</a>
+				<a href={url("/")} class="blog-title">{siteTitle}</a>
 				<slot name="header-action" />
 			</div>
-		</header>
+		</div>
 		<main id="main">
 			<slot />
 		</main>
+		<Footer />
 		<EmDashBodyEnd page={pageCtx} />
 	</body>
 </html>

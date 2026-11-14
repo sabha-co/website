@@ -1,5 +1,5 @@
 /*
-  site.css -- the page shell, after boat.dev/blog's structure: a wordmark
+  site.css -- the page shell, after boat.dev/blog's structure: a title
   header, an index of square cards with category pills, and posts in a
   narrower column under a wide cover. Sabha's tokens throughout; article
   typography lives in prose.css.
@@ -81,11 +81,11 @@
 	}
 
 	/* Header */
-	.site-header {
+	.blog-header {
 		padding-block: 2.25rem 1rem;
 	}
 
-	.site-header .frame {
+	.blog-header .frame {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -93,7 +93,7 @@
 		width: min(100% - 2 * var(--gutter), var(--page-frame));
 	}
 
-	.wordmark {
+	.blog-title {
 		color: var(--color-text);
 		font-size: clamp(1.625rem, 3vw, 2.625rem);
 		font-weight: 400;
@@ -101,7 +101,7 @@
 		line-height: 1;
 	}
 
-	.wordmark:hover {
+	.blog-title:hover {
 		color: var(--color-text);
 	}
 
@@ -447,7 +447,7 @@
 			gap: 1.5rem;
 		}
 
-		.wordmark {
+		.blog-title {
 			font-size: 1.6rem;
 		}
 	}

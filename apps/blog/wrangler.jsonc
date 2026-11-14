@@ -1,27 +1,41 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "sabha-blog",
-	// The account that holds the sabha.co zone.
+	// The Sabha account (ashwin@sabha.co's), which holds the sabha.co zone.
 	"account_id": "1948dc6c405b77891f2b25bc1018fefd",
 	"main": "./src/worker.ts",
 	"compatibility_date": "2026-02-24",
 	"compatibility_flags": ["nodejs_compat"],
-	// Only these paths on sabha.co reach the Worker; everything else goes to the
-	// Rails origin. /_emdash is EmDash's admin and API, which ignore Astro's base.
+	// Only these paths reach the Worker; everything else on the host goes to
+	// Rails. /_emdash is EmDash's admin and API, which ignore Astro's base. Each
+	// path comes as a pair: "/x/*" doesn't match the bare "/x".
+	//
+	// Both hosts for the admin handover (EmDash's "Continue on next.sabha.co"):
+	// existing passkeys only work on sabha.co until each admin registers one on
+	// next.sabha.co. Then drop the sabha.co routes and add the zone's
+	// sabha.co/blog* -> next.sabha.co/blog* Redirect Rule.
 	"routes": [
+		{ "pattern": "next.sabha.co/blog", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/blog/*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/_emdash", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/_emdash/*", "zone_name": "sabha.co" },
 		{ "pattern": "sabha.co/blog", "zone_name": "sabha.co" },
 		{ "pattern": "sabha.co/blog/*", "zone_name": "sabha.co" },
+		{ "pattern": "sabha.co/_emdash", "zone_name": "sabha.co" },
 		{ "pattern": "sabha.co/_emdash/*", "zone_name": "sabha.co" },
 	],
-	// Passkeys are bound to this origin, so run the setup wizard at sabha.co,
-	// never at the workers.dev address.
+	// Passkeys are bound to this host (EmDash takes the relying-party id from
+	// it), so never run setup at the workers.dev address.
 	"vars": {
-		"EMDASH_SITE_URL": "https://sabha.co",
+		"EMDASH_SITE_URL": "https://next.sabha.co",
 	},
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "sabha-blog",
+			// Pinned: without it Wrangler silently creates an empty database
+			// when the name doesn't match.
+			"database_id": "f5c10617-3082-4e8a-add3-2e7fb97ef31d",
 		},
 	],
 	"r2_buckets": [

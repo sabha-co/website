@@ -1,22 +1,24 @@
 # Sabha blog
 
-The blog at **sabha.co/blog**: an [EmDash](https://github.com/emdash-cms/emdash) site (Astro on a Cloudflare Worker, with D1 and R2), started from EmDash's Cloudflare blog template. Worker routes on the sabha.co zone send `/blog` and `/_emdash` to it (`wrangler.jsonc`); every other path on sabha.co still reaches Rails.
+The blog at **next.sabha.co/blog**: an [EmDash](https://github.com/emdash-cms/emdash) site (Astro on a Cloudflare Worker, with D1 and R2), started from EmDash's Cloudflare blog template. Worker routes send `/blog` and `/_emdash` to it (`wrangler.jsonc`); every other path on the host reaches Rails. It moved here from `sabha-co/sabha-blog` and `sabha.co/blog`, history included.
 
 ## Running locally
 
+From the workspace root, then this directory:
+
 ```bash
 pnpm install
-pnpm dev
+cd apps/blog && pnpm dev
 ```
 
 Open http://localhost:4321/_emdash/admin and complete the setup wizard, which applies `seed/seed.json`. The site is at http://localhost:4321/blog. Local D1 and R2 live in `.wrangler/`.
 
 ## Theme
 
-Structured after [boat.dev/blog](https://boat.dev/blog), in Sabha's own design: Instrument Sans and JetBrains Mono (self-hosted from `src/assets/fonts`, the same files the app ships), the app's ink and plum tokens in `src/styles/tokens.css`, and the shell in `src/styles/site.css`. Dark mode follows the visitor's system setting.
+Structured after [boat.dev/blog](https://boat.dev/blog), in Sabha's own design. The shared header, footer, tokens and fonts (Instrument Sans and JetBrains Mono, the same files the app ships) come from `@sabha/theme`; `src/styles/tokens.css` adds the blog's layout values and `src/styles/site.css` the shell. Dark mode follows the visitor's system setting.
 
 - **Index** (`/blog`, `/blog/category/:slug`, `/blog/tag/:slug`): eyebrow, a large "Blog" title, the site tagline as the lead (edit it in the admin under Settings), category pills, and a two-column grid of square cards with cover images. `/blog/posts` redirects to `/blog`.
-- **Post**: an "All posts" button in the header, a "Blog / Category" breadcrumb, title, date and reading time, a wide cover, then a narrower text column that opens with the excerpt. Quotes render as a boxed callout. Article typography is `src/styles/prose.css`.
+- **Post**: an "All posts" button in the blog's title bar, a "Blog / Category" breadcrumb, title, date and reading time, a wide cover, then a narrower text column that opens with the excerpt. Quotes render as a boxed callout. Article typography is `src/styles/prose.css`.
 - Posts are meant to have a cover image and one category; the pills list every category, in the order the admin returns them.
 - There are no sidebar widgets, menus or comments, so those admin settings have no effect here.
 
@@ -32,25 +34,30 @@ The admin ships in English only (`admin.locales` in `astro.config.mjs`); each ex
 
 ## Deploying
 
+Deploys are manual and need a go-ahead. From this directory:
+
 ```bash
 pnpm run deploy   # astro build && wrangler deploy
 ```
 
-Content changes made in the admin are live straight away and need no deploy. Only code and template changes do.
+`astro build` writes `dist/server/wrangler.json`, which `wrangler deploy` picks up. Content changes made in the admin are live straight away and need no deploy. Only code and template changes do.
 
 ### Cloudflare account
 
-The Worker, its D1 database and its R2 bucket live in the Cloudflare account that holds the **sabha.co** zone: account ID `bd5b792fe9596c0bb76ce100dd4f2d65`, pinned as `account_id` in `wrangler.jsonc`. It is *not* the account that holds sabha.chat (`1948dc6c…`).
+The Worker, its D1 database and its R2 bucket live in the Sabha account (ashwin@sabha.co's), which holds the **sabha.co** zone: account ID `1948dc6c405b77891f2b25bc1018fefd`, pinned as `account_id` in `wrangler.jsonc`.
 
-- Sign in with `pnpm wrangler login` as a member of that account, then check with `pnpm wrangler whoami`; it should list the account above. If you were added to the account after your last login, log in again to pick it up.
-- For one-off commands elsewhere, set `CLOUDFLARE_ACCOUNT_ID=bd5b792fe9596c0bb76ce100dd4f2d65`.
+- Sign in with `pnpm wrangler login` as a member of that account, then check with `pnpm wrangler whoami`; it should list the account above.
 - In the dashboard, switch to that account, then open Workers & Pages → `sabha-blog`, D1 → `sabha-blog`, or R2 → `sabha-blog-media`.
-
-First-time setup:
-
-1. `pnpm wrangler login` (see above).
-2. Generate the key with `npx emdash secrets generate`, then `pnpm wrangler secret put EMDASH_ENCRYPTION_KEY`. Keep a copy somewhere safe: plugin secrets can't be read back without it, and D1 backups don't include it.
-3. `pnpm run deploy`. The first deploy creates the `sabha-blog` D1 database and the `sabha-blog-media` R2 bucket, and attaches the routes.
-4. Complete the setup wizard at https://sabha.co/_emdash/admin. Passkeys are bound to `EMDASH_SITE_URL` (https://sabha.co), so never run setup at the workers.dev address.
+- The D1 database's id is pinned in `wrangler.jsonc`. Without it, a name that doesn't match makes Wrangler create an empty database silently.
+- The Worker holds the `EMDASH_ENCRYPTION_KEY` secret (`npx emdash secrets generate`, then `pnpm wrangler secret put EMDASH_ENCRYPTION_KEY`). Plugin secrets can't be read back without it, and D1 backups don't include it.
 
 D1 has Time Travel (point-in-time restore for 30 days); R2 holds the uploads.
+
+### Passkeys and the host
+
+EmDash binds passkeys to `EMDASH_SITE_URL`'s host (the relying-party id), so a passkey made on one host doesn't work on another, and setup must never run at the workers.dev address. Moving host:
+
+1. Sign in on the old host first.
+2. Deploy with both hosts' routes and `EMDASH_SITE_URL` set to the new one.
+3. In Settings → General, select **Continue on <new host>**, then register a passkey there. Every admin does this.
+4. Deploy with only the new host's routes, and redirect the old paths at the zone.

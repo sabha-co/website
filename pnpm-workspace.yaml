@@ -6,8 +6,8 @@ packages:
 # "catalog:".
 catalog:
   astro: 7.4.11
-  "@astrojs/cloudflare": 14.4.8
-  wrangler: 4.162.0
+  "@astrojs/cloudflare": 14.4.7
+  wrangler: 4.161.0
 
 # Build scripts: allow only what each runtime needs; rest false so
 # strictDepBuilds passes. One allowance covers every app.
