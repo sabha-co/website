@@ -7,22 +7,19 @@
 	"compatibility_date": "2026-02-24",
 	"compatibility_flags": ["nodejs_compat"],
 	// Only these paths reach the Worker; everything else on the host goes to
-	// Rails. /_emdash is EmDash's admin and API, which ignore Astro's base. Each
-	// path comes as a pair: "/x/*" doesn't match the bare "/x".
+	// Rails. /_emdash is EmDash's admin and API, which ignore Astro's base.
+	// "/x*" rather than "/x/*": it also matches the bare "/x" and "/x?query"
+	// (route matching includes the query string).
 	//
 	// Both hosts for the admin handover (EmDash's "Continue on next.sabha.co"):
 	// existing passkeys only work on sabha.co until each admin registers one on
 	// next.sabha.co. Then drop the sabha.co routes and add the zone's
 	// sabha.co/blog* -> next.sabha.co/blog* Redirect Rule.
 	"routes": [
-		{ "pattern": "next.sabha.co/blog", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/blog/*", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/_emdash", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/_emdash/*", "zone_name": "sabha.co" },
-		{ "pattern": "sabha.co/blog", "zone_name": "sabha.co" },
-		{ "pattern": "sabha.co/blog/*", "zone_name": "sabha.co" },
-		{ "pattern": "sabha.co/_emdash", "zone_name": "sabha.co" },
-		{ "pattern": "sabha.co/_emdash/*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/blog*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/_emdash*", "zone_name": "sabha.co" },
+		{ "pattern": "sabha.co/blog*", "zone_name": "sabha.co" },
+		{ "pattern": "sabha.co/_emdash*", "zone_name": "sabha.co" },
 	],
 	// Passkeys are bound to this host (EmDash takes the relying-party id from
 	// it), so never run setup at the workers.dev address.

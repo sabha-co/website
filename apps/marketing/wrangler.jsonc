@@ -12,18 +12,21 @@
 		// Only the landing needs a decision; every other path is an asset.
 		"run_worker_first": ["/"],
 	},
-	// Exactly these paths reach this Worker; everything else on the host goes
-	// to Rails. A route without a wildcard matches that path alone.
+	// Only these paths reach this Worker; everything else on the host goes to
+	// Rails. Route matching includes the query string, so each page ends in "*"
+	// to catch "/about?utm_source=…" and "/about/" (which the assets redirect
+	// to "/about"). Bare "/" can't take a "*" without claiming the whole host:
+	// the zone's URL Rewrite Rule clears its query string before routing.
 	"routes": [
 		{ "pattern": "next.sabha.co/", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/about", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/changelog", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/terms", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/privacy", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/openclaw", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/robots.txt", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/sitemap.xml", "zone_name": "sabha.co" },
-		{ "pattern": "next.sabha.co/llms.txt", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/about*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/changelog*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/terms*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/privacy*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/openclaw*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/robots.txt*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/sitemap.xml*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/llms.txt*", "zone_name": "sabha.co" },
 		{ "pattern": "next.sabha.co/_site/*", "zone_name": "sabha.co" },
 	],
 }
