@@ -1,0 +1,36 @@
+---
+// The about, legal, OpenClaw and changelog pages: a label, a title and a
+// column of running text.
+import Marketing from "./Marketing.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  label: string;
+  heading: string;
+  updated?: string;
+}
+
+const { title, description, label, heading, updated } = Astro.props;
+---
+
+<Marketing title={title} description={description}>
+  <section class="landing-section landing-page">
+    <div class="landing-inner landing-page-inner">
+      <div class:list={["landing-section-header", { "landing-page-header--mark": Astro.slots.has("mark") }]}>
+        <slot name="mark" />
+        <span class="landing-label">{label}</span>
+        <h1 class="landing-section-title">{heading}</h1>
+        {updated && <p class="landing-section-sub landing-page-updated">{updated}</p>}
+      </div>
+
+      {Astro.slots.has("figure") && <div class="landing-page-figure"><slot name="figure" /></div>}
+
+      <div class="landing-prose">
+        <slot />
+      </div>
+    </div>
+  </section>
+
+  <div class="landing-divider"></div>
+</Marketing>

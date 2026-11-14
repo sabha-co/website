@@ -1,0 +1,9 @@
+# Hashed build files never change, so browsers keep them for a year.
+/_site/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: CSP_PLACEHOLDER

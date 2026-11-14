@@ -1,0 +1,69 @@
+---
+import Prose from "../layouts/Prose.astro";
+---
+
+<Prose title="Privacy Policy" description="How Sabha collects, uses, and protects your data on sabha.co." label="LEGAL" heading="Privacy Policy" updated="Last updated: April 18, 2026">
+  <p>This policy explains what information Sabha LLC ("Sabha", "we", "us") collects when you use <a href="https://sabha.co" class="landing-link">sabha.co</a>, how we use it, and the choices you have. Sabha LLC is the data controller for sabha.co and is a Delaware limited liability company.</p>
+
+  <p>If you self-host the open source Sabha software, this policy does not apply to your deployment — you are the controller of your own data.</p>
+
+  <h2>What we collect</h2>
+
+  <h3>Account information</h3>
+  <p>When you sign up, we collect your email address and display name. If you set a password, we store only a bcrypt hash of it — we never store or can recover the plain-text password. You may optionally add a profile photo, a LinkedIn or X handle, and a short bio.</p>
+
+  <h3>Workspace content</h3>
+  <p>We store the messages, files, reactions, bookmarks, thread participation, and room memberships that make up your workspace. Each workspace runs on its own SQLite database, isolated from every other workspace on sabha.co.</p>
+
+  <h3>Usage data</h3>
+  <p>We log IP addresses, user-agent strings, and timestamps for sessions, sign-ins, and security events (including bans and rate-limiting). These are used to keep accounts secure and prevent abuse.</p>
+
+  <h3>Push notifications</h3>
+  <p>If you enable push notifications, we store the push subscription endpoint and keys provided by your browser or device. You can revoke this at any time from your browser settings or your Sabha profile.</p>
+
+  <h3>Cookies</h3>
+  <p>We use a first-party session cookie to keep you signed in. We do not use analytics, advertising, or cross-site tracking cookies. Cloudflare Turnstile may set short-lived cookies during signup to verify you are not a bot.</p>
+
+  <h2>How we use it</h2>
+  <p>We use your information to operate sabha.co — deliver messages, authenticate sessions, send transactional emails (OTP codes, password resets, workspace notifications), prevent abuse, and diagnose errors. We do not sell your personal data, and we do not use it to train machine-learning models.</p>
+
+  <h2>Service providers we use</h2>
+  <p>We rely on a small set of third-party infrastructure providers to operate sabha.co. They act as processors under our instructions, and we share only the minimum data required for each purpose:</p>
+  <ul>
+    <li><strong>Transactional email</strong> — delivers sign-in codes, password resets, and workspace notifications. Receives your email address, name, and the email body.</li>
+    <li><strong>Bot-prevention</strong> — verifies you are not an automated script during signup. Receives your IP, user-agent, and challenge tokens.</li>
+    <li><strong>Backup storage</strong> — stores encrypted workspace backups for disaster recovery.</li>
+    <li><strong>Error monitoring</strong> — receives application error traces when something goes wrong on the server. Message content and credentials are not sent.</li>
+    <li><strong>Avatar generation</strong> — generates default avatars when you don't upload one. Receives a seed string derived from your name or user ID.</li>
+  </ul>
+  <p>The specific vendors in each category may change over time; a current list is available on request. Other than these, we do not share personal data with third parties, except when required by law (valid subpoena, court order) or to protect the rights, safety, or property of Sabha, our users, or the public.</p>
+
+  <h2>How long we keep it</h2>
+  <p>Account and workspace data is retained as long as your workspace is active. When you delete a message or a room, it is soft-deleted and removed from view; it may persist briefly in backups before being purged.</p>
+  <p>When you delete a workspace, its active database is removed and a final backup is retained for a limited period (typically 30 days) for disaster recovery, after which it is purged. Security and access logs are retained for up to 12 months.</p>
+
+  <h2>Your rights</h2>
+  <p>You can:</p>
+  <ul>
+    <li><strong>Access and export</strong> your workspace data at any time from inside the workspace.</li>
+    <li><strong>Correct</strong> your profile information from the settings page.</li>
+    <li><strong>Delete</strong> your account or any workspace you administer.</li>
+    <li><strong>Revoke</strong> push notification permissions and active sessions.</li>
+  </ul>
+  <p>If you are in the EEA, UK, or California, you may have additional rights (access, portability, erasure, objection, restriction of processing). To exercise any of these, email us at the address below and we will respond within 30 days.</p>
+
+  <h2>Security</h2>
+  <p>All traffic is served over HTTPS. Passwords are hashed with bcrypt. OTP codes use a cryptographically secure random generator and expire quickly. Workspace databases are isolated from each other. File attachments are served only to authenticated users. Despite these measures, no internet service can guarantee perfect security.</p>
+
+  <h2>Children</h2>
+  <p>sabha.co is not directed at children under 13. We do not knowingly collect information from children under 13. If you believe a child has created an account, contact us and we will delete it.</p>
+
+  <h2>International users</h2>
+  <p>Our servers and backups are operated in the United States and through Cloudflare's global network. By using sabha.co you consent to the transfer and processing of your data in the US and in other jurisdictions where our service providers operate.</p>
+
+  <h2>Changes</h2>
+  <p>We may update this policy from time to time. Material changes will be announced on the service or via email. The "Last updated" date at the top always reflects the current version.</p>
+
+  <h2>Contact</h2>
+  <p>Questions, requests, or privacy concerns? Email <strong>help[at]sabha.co</strong>.</p>
+</Prose>

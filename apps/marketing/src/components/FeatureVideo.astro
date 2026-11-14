@@ -1,0 +1,29 @@
+---
+// A looping product clip. The poster loads with the page; the video itself
+// only as it nears the viewport (scripts/landing.ts), and never for visitors
+// who prefer reduced motion.
+interface Props {
+  name: "room" | "threads" | "bot";
+  width: number;
+  height: number;
+  label: string;
+}
+
+const { name, width, height, label } = Astro.props;
+---
+
+<div class="landing-feature-screenshot landing-feature-screenshot--media">
+  <video
+    class="landing-feature-media"
+    width={width}
+    height={height}
+    poster={`/_site/screenshots/${name}-sabha-poster.webp`}
+    data-lazy-src={`/_site/screenshots/${name}-sabha.mp4`}
+    aria-label={label}
+    autoplay
+    loop
+    muted
+    playsinline
+    preload="none"
+  ></video>
+</div>
