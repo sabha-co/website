@@ -1,0 +1,3 @@
+# Changes to how and where the sites deploy need the owner's review.
+/.github/ @ashwin47
+**/wrangler.jsonc @ashwin47

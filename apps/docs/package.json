@@ -11,7 +11,7 @@
     "check": "nimbus-docs check",
     "lint:docs": "nimbus-docs lint",
     "lint:docs:fix": "nimbus-docs lint --fix",
-    "deploy": "astro check && astro build && wrangler deploy --config wrangler.jsonc"
+    "deploy": "astro check && pnpm build && wrangler deploy"
   },
   "dependencies": {
     "@astrojs/cloudflare": "catalog:",

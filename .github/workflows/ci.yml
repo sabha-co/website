@@ -1,0 +1,97 @@
+name: CI
+
+# Builds and checks every PR, with no secrets. Only the apps a PR touches are
+# built; a change outside apps/ (the theme, shared scripts, the lockfile, this
+# file) builds them all. Pushes to main build everything.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shared:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.scope.outputs.apps }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Which apps to build
+        id: scope
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -n "$BASE_REF" ]; then
+            apps=$(node scripts/changed-apps.mjs "origin/$BASE_REF")
+          else
+            apps=$(node -e 'import("./scripts/changed-apps.mjs").then(m => console.log(JSON.stringify(m.APPS)))')
+          fi
+          echo "apps=$apps" >> "$GITHUB_OUTPUT"
+          echo "Building: $apps"
+
+      - name: Shared scripts and theme
+        run: |
+          node --test 'scripts/*.test.mjs'
+          pnpm --filter @sabha/theme test
+
+      # The repo is public: nothing that looks like a credential may land in it.
+      - name: Scan history for secrets
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$RUNNER_TEMP/$archive" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$archive"
+          echo "$GITLEAKS_SHA256  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" git --redact --no-banner .
+
+  app:
+    needs: shared
+    if: needs.shared.outputs.apps != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.shared.outputs.apps) }}
+    defaults:
+      run:
+        working-directory: apps/${{ matrix.app }}
+    steps:
+      # Nimbus reads page dates from git, so the docs need full history.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        working-directory: .
+
+      - run: pnpm run build
+      - run: pnpm run --if-present test
+      - run: pnpm run --if-present typecheck
+      - run: pnpm run --if-present check
+      - run: pnpm run --if-present lint:docs
