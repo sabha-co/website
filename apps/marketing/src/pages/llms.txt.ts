@@ -1,4 +1,7 @@
-# Sabha
+import type { APIRoute } from "astro";
+import { siteUrl } from "@sabha/theme/site";
+
+const BODY = `# Sabha
 
 > Sabha is an open-core, self-hostable group chat platform for communities and teams.
 
@@ -14,6 +17,9 @@ Sabha is built with Ruby on Rails, Hotwire, and ActionCable. It supports self-ho
 
 ## Docs
 
-- [Documentation](https://next.sabha.co/docs/llms.txt): guides for self-hosting, apps and features
+- [Documentation](${siteUrl("/docs/llms.txt")}): guides for self-hosting, apps and features
 - [README](https://github.com/sabha-co/sabha/blob/main/README.md)
-- [Changelog](https://next.sabha.co/changelog)
+- [Changelog](${siteUrl("/changelog")})
+`;
+
+export const GET: APIRoute = () => new Response(BODY, { headers: { "Content-Type": "text/plain; charset=utf-8" } });

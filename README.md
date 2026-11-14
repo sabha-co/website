@@ -31,4 +31,4 @@ pnpm smoke --app blog --base http://localhost:8787
 
 The smoke script requests the app's claimed paths, checks their status and security headers, and confirms `/session/new` and `/up` still come from Rails.
 
-Deploys are manual and reviewed; see `docs/cutover.md`.
+Deploys are manual, from the Deploy workflow on `main`. Moving the sites to sabha.co at launch: `docs/cutover.md`.
