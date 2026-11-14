@@ -4,7 +4,11 @@
 	// The Sabha account (ashwin@sabha.co's), which holds the sabha.co zone.
 	"account_id": "1948dc6c405b77891f2b25bc1018fefd",
 	"compatibility_date": "2026-11-13",
-	// Assets only: the build is static and nests itself under /docs.
+	// Assets only: the build is static and nests itself under /docs. The
+	// adapter also writes a redirect (.wrangler/deploy/config.json) to a config
+	// in dist/client/docs/ that uploads only that folder, so /docs/* misses
+	// every page and _headers is left out. The build deletes the redirect so
+	// wrangler reads this file.
 	"assets": {
 		"directory": "./dist/client",
 		"not_found_handling": "404-page",

@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node ../../scripts/inline-csp.mjs dist/client --wasm",
-    "preview": "wrangler dev --config wrangler.jsonc",
+    "build": "astro build && rm -f .wrangler/deploy/config.json && node ../../scripts/inline-csp.mjs dist/client --wasm",
+    "preview": "wrangler dev",
     "typecheck": "astro check",
     "check": "nimbus-docs check",
     "lint:docs": "nimbus-docs lint",
