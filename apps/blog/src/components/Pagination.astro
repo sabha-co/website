@@ -1,0 +1,21 @@
+---
+interface Props {
+	/** Path of the first page, e.g. "/blog/posts" */
+	basePath: string;
+	cursor?: string;
+	nextCursor?: string;
+}
+
+const { basePath, cursor, nextCursor } = Astro.props;
+---
+
+{
+	(cursor || nextCursor) && (
+		<nav class="pagination" aria-label="Pagination">
+			{cursor ? <a href={basePath}>← Newest</a> : <span />}
+			{nextCursor && (
+				<a href={`${basePath}?cursor=${encodeURIComponent(nextCursor)}`}>Older →</a>
+			)}
+		</nav>
+	)
+}

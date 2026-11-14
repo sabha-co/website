@@ -1,0 +1,92 @@
+---
+import { getSiteSettingsWithCacheHint } from "emdash";
+import { EmDashHead, EmDashBodyStart, EmDashBodyEnd } from "emdash/ui";
+import { createPublicPageContext } from "emdash/page";
+import { getSiteLocale } from "../utils/locale";
+import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import { url } from "../utils/url";
+import "../styles/tokens.css";
+import "../styles/site.css";
+
+interface Props {
+	title: string;
+	pageTitle?: string | null;
+	description?: string | null;
+	image?: string | null;
+	canonical?: string | null;
+	robots?: string | null;
+	type?: "website" | "article";
+	publishedTime?: string | null;
+	modifiedTime?: string | null;
+	author?: string | null;
+	/** Pass content reference for plugin page contributions on content pages */
+	content?: { collection: string; id: string; slug?: string | null };
+}
+
+const {
+	title,
+	pageTitle,
+	description,
+	image,
+	canonical,
+	robots,
+	type = "website",
+	publishedTime,
+	modifiedTime,
+	author,
+	content,
+} = Astro.props;
+const settingsResult = await getSiteSettingsWithCacheHint();
+if (Astro.cache?.enabled) Astro.cache.set(settingsResult.cacheHint);
+
+const { siteTitle } = resolveBlogSiteIdentity(settingsResult.data);
+const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
+
+// SEO data is passed here and rendered by EmDashHead
+const pageCtx = createPublicPageContext({
+	Astro,
+	kind: content ? "content" : "custom",
+	pageType: type,
+	title: fullTitle,
+	pageTitle: pageTitle ?? title,
+	description,
+	canonical,
+	image,
+	content,
+	seo: { ogImage: image, robots },
+	articleMeta: { publishedTime, modifiedTime, author },
+	siteName: siteTitle,
+});
+
+const lang = getSiteLocale() ?? "en";
+---
+
+<!doctype html>
+<html lang={lang}>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{fullTitle}</title>
+		<EmDashHead page={pageCtx} />
+		<link
+			rel="alternate"
+			type="application/rss+xml"
+			title={`${siteTitle} RSS Feed`}
+			href={url("/rss.xml")}
+		/>
+	</head>
+	<body>
+		<EmDashBodyStart page={pageCtx} />
+		<a href="#main" class="skip-link">Skip to content</a>
+		<header class="site-header">
+			<div class="frame">
+				<a href={url("/")} class="wordmark">{siteTitle}</a>
+				<slot name="header-action" />
+			</div>
+		</header>
+		<main id="main">
+			<slot />
+		</main>
+		<EmDashBodyEnd page={pageCtx} />
+	</body>
+</html>

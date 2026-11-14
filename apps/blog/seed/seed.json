@@ -1,0 +1,889 @@
+{
+	"$schema": "https://emdashcms.com/seed.schema.json",
+	"version": "1",
+	"meta": {
+		"name": "Blog Starter",
+		"description": "A blog with posts and pages",
+		"author": "EmDash"
+	},
+	"settings": {
+		"title": "Sabha",
+		"tagline": "Sabha is team chat with a teammate that learns, grounded in a wiki your team can read and correct."
+	},
+	"collections": [
+		{
+			"slug": "posts",
+			"label": "Posts",
+			"labelSingular": "Post",
+			"urlPattern": "/posts/{slug}",
+			"supports": [
+				"drafts",
+				"revisions",
+				"preview",
+				"scheduling",
+				"search",
+				"seo"
+			],
+			"commentsEnabled": true,
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true,
+					"searchable": true
+				},
+				{
+					"slug": "featured_image",
+					"label": "Featured Image",
+					"type": "image"
+				},
+				{
+					"slug": "content",
+					"label": "Content",
+					"type": "portableText",
+					"searchable": true
+				},
+				{
+					"slug": "excerpt",
+					"label": "Excerpt",
+					"type": "text"
+				}
+			]
+		},
+		{
+			"slug": "pages",
+			"label": "Pages",
+			"labelSingular": "Page",
+			"urlPattern": "/pages/{slug}",
+			"supports": [
+				"drafts",
+				"revisions",
+				"preview",
+				"search",
+				"seo"
+			],
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true,
+					"searchable": true
+				},
+				{
+					"slug": "content",
+					"label": "Content",
+					"type": "portableText",
+					"searchable": true
+				}
+			]
+		}
+	],
+	"taxonomies": [
+		{
+			"name": "category",
+			"label": "Categories",
+			"labelSingular": "Category",
+			"hierarchical": true,
+			"collections": [
+				"posts"
+			],
+			"terms": [
+				{
+					"slug": "engineering",
+					"label": "Engineering"
+				},
+				{
+					"slug": "product",
+					"label": "Product"
+				},
+				{
+					"slug": "vision",
+					"label": "Vision"
+				}
+			]
+		},
+		{
+			"name": "tag",
+			"label": "Tags",
+			"labelSingular": "Tag",
+			"hierarchical": false,
+			"collections": [
+				"posts"
+			],
+			"terms": [
+				{
+					"slug": "teams",
+					"label": "Teams"
+				},
+				{
+					"slug": "agents",
+					"label": "Agents"
+				},
+				{
+					"slug": "wiki",
+					"label": "Wiki"
+				},
+				{
+					"slug": "self-hosting",
+					"label": "Self-hosting"
+				}
+			]
+		}
+	],
+	"bylines": [
+		{
+			"id": "byline-team",
+			"slug": "sabha-team",
+			"displayName": "Sabha Team"
+		}
+	],
+	"menus": [
+		{
+			"name": "primary",
+			"label": "Primary Navigation",
+			"items": [
+				{
+					"type": "custom",
+					"label": "Home",
+					"url": "/blog"
+				},
+				{
+					"type": "custom",
+					"label": "About",
+					"url": "/blog/pages/about"
+				},
+				{
+					"type": "custom",
+					"label": "Posts",
+					"url": "/blog/posts"
+				}
+			]
+		}
+	],
+	"sections": [
+		{
+			"slug": "newsletter-signup",
+			"title": "Newsletter Signup",
+			"description": "A call-to-action block for newsletter subscriptions",
+			"keywords": [
+				"newsletter",
+				"subscribe",
+				"email",
+				"cta"
+			],
+			"source": "theme",
+			"content": [
+				{
+					"_type": "block",
+					"style": "h3",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Stay in the loop",
+							"_key": "k1"
+						}
+					],
+					"_key": "k0"
+				},
+				{
+					"_type": "block",
+					"style": "normal",
+					"children": [
+						{
+							"_type": "span",
+							"text": "Get notified when new posts are published. No spam, unsubscribe anytime.",
+							"_key": "k3"
+						}
+					],
+					"_key": "k2"
+				}
+			]
+		},
+		{
+			"slug": "about-author",
+			"title": "About the Author",
+			"description": "Brief author bio for use in posts or pages",
+			"keywords": [
+				"author",
+				"bio",
+				"about"
+			],
+			"source": "theme",
+			"content": [
+				{
+					"_type": "block",
+					"style": "normal",
+					"children": [
+						{
+							"_type": "span",
+							"text": "A software developer who writes about building things on the web. Based somewhere with good coffee and reliable internet.",
+							"_key": "k1"
+						}
+					],
+					"_key": "k0"
+				}
+			]
+		}
+	],
+	"content": {
+		"pages": [
+			{
+				"id": "about",
+				"slug": "about",
+				"status": "published",
+				"data": {
+					"title": "About",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k61",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Sabha is team chat with a teammate that learns, grounded in a wiki your team can read and correct.",
+									"_key": "k62"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k63",
+							"children": [
+								{
+									"_type": "span",
+									"text": "It's built for internal teams of ten to fifty people, runs on a server you own, and works with the model provider you choose.",
+									"_key": "k64"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k65",
+							"children": [
+								{
+									"_type": "span",
+									"text": "This blog is where we write about what we're building, and why.",
+									"_key": "k66"
+								}
+							],
+							"markDefs": []
+						}
+					]
+				}
+			}
+		],
+		"posts": [
+			{
+				"id": "post-6",
+				"slug": "sized-for-small-teams",
+				"status": "published",
+				"data": {
+					"title": "Built for ten to fifty people",
+					"excerpt": "Rooms, threads, DMs and search, sized for teams that ship something together.",
+					"featured_image": {
+						"$media": {
+							"url": "https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=1200&h=800&fit=crop",
+							"alt": "Code on a screen with a dark theme",
+							"filename": "weekend-side-project.jpg"
+						}
+					},
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k51",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Sabha is for the ten to fifty people who ship something together and lose half of what they know to scrollback.",
+									"_key": "k52"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "k53",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Familiar on purpose",
+									"_key": "k54"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k55",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Rooms for topics, threads for tangents, DMs for the rest, and search for memory. You shouldn't have to teach your team a new app.",
+									"_key": "k56"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "k57",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Small on purpose",
+									"_key": "k58"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k59",
+							"children": [
+								{
+									"_type": "span",
+									"text": "No marketplaces, no notification noise, no features that don't earn their place. The conversation is the product; everything else should get out of the way.",
+									"_key": "k60"
+								}
+							],
+							"markDefs": []
+						}
+					]
+				},
+				"bylines": [
+					{
+						"byline": "byline-team"
+					}
+				],
+				"taxonomies": {
+					"category": [
+						"engineering"
+					],
+					"tag": [
+						"teams",
+						"self-hosting"
+					]
+				}
+			},
+			{
+				"id": "post-5",
+				"slug": "the-brain-is-rented",
+				"status": "published",
+				"data": {
+					"title": "The brain is rented. The memory is yours.",
+					"excerpt": "Sabha works with the model provider you choose. Swap it, and the team's knowledge is untouched.",
+					"featured_image": {
+						"$media": {
+							"url": "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=1200&h=800&fit=crop",
+							"alt": "Pencils and design tools on a desk",
+							"filename": "designing-with-constraints.jpg"
+						}
+					},
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k41",
+							"children": [
+								{
+									"_type": "span",
+									"text": "The model does the thinking. Sabha owns everything around it: the permissions, the wiki, and the judgement about what goes into a prompt.",
+									"_key": "k42"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "k43",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Memory lives in the wiki",
+									"_key": "k44"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k45",
+							"children": [
+								{
+									"_type": "span",
+									"text": "The team's memory is the wiki, not the conversation history the model happened to see. That's what makes the model genuinely replaceable rather than nominally so.",
+									"_key": "k46"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "k47",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Your box, your data",
+									"_key": "k48"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k49",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Sabha runs on a server you own, against a provider you pick, and the wiki is yours in a format that outlives us.",
+									"_key": "k50"
+								}
+							],
+							"markDefs": []
+						}
+					]
+				},
+				"bylines": [
+					{
+						"byline": "byline-team"
+					}
+				],
+				"taxonomies": {
+					"category": [
+						"engineering"
+					],
+					"tag": [
+						"self-hosting",
+						"agents"
+					]
+				}
+			},
+			{
+				"id": "post-4",
+				"slug": "pages-awaiting-review",
+				"status": "published",
+				"data": {
+					"title": "Why the agent can't publish its own pages",
+					"excerpt": "Everything the agent writes waits for a person to sign it. Here's why that rule matters more than any model.",
+					"featured_image": {
+						"$media": {
+							"url": "https://images.unsplash.com/photo-1575026615908-666710ae5e47?w=1200&h=800&fit=crop",
+							"alt": "Wrenches and hand tools hanging on a workshop wall",
+							"filename": "small-tools.jpg"
+						}
+					},
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k33",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Once an agent can write, there is a short path from a stranger's message to a durable, cited fact. Someone says something in chat, the agent writes it down, and from then on it quotes its own note back to you.",
+									"_key": "k34"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "k35",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Contained at the output",
+									"_key": "k36"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k37",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Reading what people write is the whole point, so the injection can't be stopped at the input. Sabha contains it at the output instead: the agent may only use what a person stood behind.",
+									"_key": "k38"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k39",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Anything the agent writes is marked awaiting review, and stays that way until someone signs it. Until then, the agent knows the page exists but cannot quote a word of it.",
+									"_key": "k40"
+								}
+							],
+							"markDefs": []
+						}
+					]
+				},
+				"bylines": [
+					{
+						"byline": "byline-team"
+					}
+				],
+				"taxonomies": {
+					"category": [
+						"product"
+					],
+					"tag": [
+						"wiki",
+						"agents"
+					]
+				}
+			},
+			{
+				"id": "post-3",
+				"slug": "the-correction-loop",
+				"status": "published",
+				"data": {
+					"title": "The correction loop",
+					"excerpt": "Ask, open, fix, sign. Four moves that leave the team's knowledge a little more correct every time.",
+					"featured_image": {
+						"$media": {
+							"url": "https://images.unsplash.com/photo-1432821596592-e2c18b78144f?w=1200&h=800&fit=crop",
+							"alt": "Notebook and pen on a desk",
+							"filename": "learning-in-public.jpg"
+						}
+					},
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k23",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Sabha is a chat app. Beside the rooms is a wiki: pages of what the team knows, editable by anyone, with every version kept.",
+									"_key": "k24"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "k25",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Ask, open, fix, sign",
+									"_key": "k26"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k27",
+							"children": [
+								{
+									"_type": "span",
+									"text": "You ask the teammate a question and get an answer with links. You open a page and read what the team believes. If a sentence is wrong, you fix it like any wiki page. Then you sign: you confirm you stand behind it as it now reads.",
+									"_key": "k28"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "blockquote",
+							"_key": "k29",
+							"children": [
+								{
+									"_type": "span",
+									"text": "The same click that fixes a wrong page is the click that approves it.",
+									"_key": "k30"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k31",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Signing isn't paperwork beside the work. It is the save button. That is the only reason to believe anyone will actually do it.",
+									"_key": "k32"
+								}
+							],
+							"markDefs": []
+						}
+					]
+				},
+				"bylines": [
+					{
+						"byline": "byline-team"
+					}
+				],
+				"taxonomies": {
+					"category": [
+						"product"
+					],
+					"tag": [
+						"wiki",
+						"agents"
+					]
+				}
+			},
+			{
+				"id": "post-2",
+				"slug": "one-teammate-per-team",
+				"status": "published",
+				"data": {
+					"title": "One teammate per team, not one bot per room",
+					"excerpt": "Sabha has a single agent for the whole team: one identity, one memory, in whichever rooms you add it to.",
+					"featured_image": {
+						"$media": {
+							"url": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1200&h=800&fit=crop",
+							"alt": "Laptop and coffee on a wooden table",
+							"filename": "case-for-static.jpg"
+						}
+					},
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k13",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Most chat tools treat AI as a feature in every channel. We think a team needs one teammate, the way it has one wiki.",
+									"_key": "k14"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "k15",
+							"children": [
+								{
+									"_type": "span",
+									"text": "One identity",
+									"_key": "k16"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k17",
+							"children": [
+								{
+									"_type": "span",
+									"text": "The agent is a member of the rooms you choose. You @mention it and it answers, with links to the pages it used. It is the same teammate in every room, so what it learns in one room helps in the next.",
+									"_key": "k18"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "k19",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Awake when you're not",
+									"_key": "k20"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k21",
+							"children": [
+								{
+									"_type": "span",
+									"text": "A laptop agent is asleep when you are. Sabha's runs on the server the team already uses, so someone in another timezone still gets an answer, and the team's memory doesn't depend on one person's machine.",
+									"_key": "k22"
+								}
+							],
+							"markDefs": []
+						}
+					]
+				},
+				"bylines": [
+					{
+						"byline": "byline-team"
+					}
+				],
+				"taxonomies": {
+					"category": [
+						"vision"
+					],
+					"tag": [
+						"agents",
+						"teams"
+					]
+				}
+			},
+			{
+				"id": "post-1",
+				"slug": "why-sabha",
+				"status": "published",
+				"data": {
+					"title": "Why we're building Sabha",
+					"excerpt": "A team's knowledge dies in scrollback. Sabha is chat with a teammate that writes it down, and lets you correct it.",
+					"featured_image": {
+						"$media": {
+							"url": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&h=800&fit=crop",
+							"alt": "Code on a monitor in a dark room",
+							"filename": "building-long-term.jpg"
+						}
+					},
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k1",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Why did we pick this database? Who owns the billing service? What did we decide in March? The answers are all in the chat, and none of them are findable a month later.",
+									"_key": "k2"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k3",
+							"children": [
+								{
+									"_type": "span",
+									"text": "New people ask questions that were answered long ago. Nobody writes the wiki, because writing a wiki is work and the payoff is someone else's.",
+									"_key": "k4"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "k5",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Two answers, both broken",
+									"_key": "k6"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k7",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Chat search rebuilds every answer from raw history, so a wrong answer stays wrong forever: there is nothing to fix. Agent memory compounds, but the machine owns it. You can read what it remembers; you cannot change it.",
+									"_key": "k8"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "blockquote",
+							"_key": "k9",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Every chat AI can answer from history. None of them can be corrected.",
+									"_key": "k10"
+								}
+							],
+							"markDefs": []
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "k11",
+							"children": [
+								{
+									"_type": "span",
+									"text": "Sabha's bet is that the correction loop is worth more than the retrieval. This blog is where we'll write about why, and how.",
+									"_key": "k12"
+								}
+							],
+							"markDefs": []
+						}
+					]
+				},
+				"bylines": [
+					{
+						"byline": "byline-team"
+					}
+				],
+				"taxonomies": {
+					"category": [
+						"vision"
+					],
+					"tag": [
+						"teams"
+					]
+				}
+			},
+			{
+				"id": "post-draft",
+				"slug": "work-in-progress",
+				"status": "draft",
+				"data": {
+					"title": "Work in Progress",
+					"excerpt": "This post is still being written.",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "This is a draft post that won't appear in the public listing.",
+									"_key": "k1"
+								}
+							],
+							"_key": "k0"
+						}
+					]
+				}
+			}
+		]
+	}
+}

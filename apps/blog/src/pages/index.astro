@@ -1,0 +1,20 @@
+---
+import { getEmDashCollection, getSiteSettings } from "emdash";
+import Base from "../layouts/Base.astro";
+import BlogIndex from "../components/BlogIndex.astro";
+import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import { url } from "../utils/url";
+
+const cursor = Astro.url.searchParams.get("cursor") || undefined;
+const { siteTitle, siteTagline } = resolveBlogSiteIdentity(await getSiteSettings());
+const { entries: posts, cacheHint, nextCursor } = await getEmDashCollection("posts", {
+	orderBy: { published_at: "desc" },
+	limit: 12,
+	cursor,
+});
+if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+---
+
+<Base title={siteTitle} description={siteTagline}>
+	<BlogIndex posts={posts} basePath={url("/")} cursor={cursor} nextCursor={nextCursor} />
+</Base>

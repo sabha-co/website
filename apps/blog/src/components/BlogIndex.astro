@@ -1,0 +1,72 @@
+---
+import { getTaxonomyTermsWithCacheHint, getTermsForEntries, getSiteSettings } from "emdash";
+import PostCard from "./PostCard.astro";
+import Pagination from "./Pagination.astro";
+import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import type { PostEntry } from "../utils/post-entry";
+import { url } from "../utils/url";
+
+interface Props {
+	posts: PostEntry[];
+	/** Slug of the category being shown; none for all posts. */
+	activeCategory?: string;
+	/** Replaces "Blog" and the tagline, e.g. on a tag's page. Highlights no pill. */
+	heading?: { title: string; lead?: string | null };
+	/** First-page path, for pagination links. */
+	basePath: string;
+	cursor?: string;
+	nextCursor?: string;
+}
+
+const { posts, activeCategory, heading, basePath, cursor, nextCursor } = Astro.props;
+const { siteTagline } = resolveBlogSiteIdentity(await getSiteSettings());
+
+const termsResult = await getTaxonomyTermsWithCacheHint("category", { includeCounts: false });
+if (Astro.cache?.enabled) Astro.cache.set(termsResult.cacheHint);
+const categories = termsResult.data;
+
+// One batched query for every card's category.
+const categoriesByEntry = await getTermsForEntries(
+	"posts",
+	posts.map((post) => post.data.id),
+	"category",
+);
+---
+
+<div class="frame index">
+	<p class="eyebrow">Sabha</p>
+	<h1 class="display">{heading?.title ?? "Blog"}</h1>
+	{(heading ? heading.lead : siteTagline) && <p class="lead">{heading ? heading.lead : siteTagline}</p>}
+
+	{
+		categories.length > 0 && (
+			<nav class="pills" aria-label="Categories">
+				<a href={url("/")} aria-current={activeCategory || heading ? undefined : "page"}>All</a>
+				{categories.map((term) => (
+					<a href={url(`/category/${term.slug}`)} aria-current={term.slug === activeCategory ? "page" : undefined}>
+						{term.label}
+					</a>
+				))}
+			</nav>
+		)
+	}
+
+	{
+		posts.length > 0 ? (
+			<div class="cards">
+				{posts.map((post, index) => (
+					<PostCard
+						post={post}
+						category={categoriesByEntry.get(post.data.id)?.[0]}
+						priority={index < 2}
+					/>
+				))}
+			</div>
+		) : (
+			<p class="empty">Nothing published here yet.</p>
+		)
+	}
+
+	<Pagination basePath={basePath} cursor={cursor} nextCursor={nextCursor} />
+	<p class="subscribe"><a href={url("/rss.xml")}>Subscribe via RSS</a></p>
+</div>

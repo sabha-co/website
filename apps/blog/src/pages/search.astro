@@ -1,0 +1,89 @@
+---
+import { url } from "../utils/url";
+export const prerender = false;
+
+import { search } from "emdash";
+import Base from "../layouts/Base.astro";
+
+const query = Astro.url.searchParams.get("q")?.trim() || "";
+
+// Use the FTS-backed search() API instead of loading every post and
+// filtering in JS. FTS scales as the post count grows, returns ranked
+// results, and handles tokenization/stemming. Templates that grep all
+// post bodies in JS quickly become unusable past a few hundred posts.
+const { items: results, nextCursor } = query
+	? await search(query, { collections: ["posts"], limit: 30 })
+	: { items: [], nextCursor: undefined };
+
+function escapeHtml(text: string) {
+	return text
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
+		.replaceAll('"', "&quot;")
+		.replaceAll("'", "&#39;");
+}
+
+// The snippet is cut from the first indexed field, which for posts is the
+// title. When it is the whole title, show its highlights in the heading
+// instead of repeating the title underneath.
+const rows = results.map((result) => {
+	const title = result.title ?? "Untitled";
+	const snippetIsTitle =
+		result.snippet?.replaceAll("<mark>", "").replaceAll("</mark>", "") ===
+		escapeHtml(title);
+	return {
+		path: url(`/posts/${result.slug ?? result.id}`),
+		title,
+		titleHtml: snippetIsTitle ? result.snippet : undefined,
+		snippet: snippetIsTitle ? undefined : result.snippet,
+	};
+});
+
+const countLabel = nextCursor
+	? `Top ${rows.length} results`
+	: `${rows.length} ${rows.length === 1 ? "result" : "results"}`;
+---
+
+<Base title={query ? `Search: ${query}` : "Search"} robots="noindex">
+	<a slot="header-action" class="button" href={url("/")}>All posts</a>
+	<div class="frame frame--text page">
+		<h1 class="post__title">Search</h1>
+		<form class="search-form" method="get" action={url("/search")} role="search">
+			<input
+				type="search"
+				name="q"
+				value={query}
+				placeholder="Search the blog"
+				aria-label="Search the blog"
+				autofocus={!query}
+			/>
+			<button type="submit">Search</button>
+		</form>
+		{
+			query && (
+				<>
+					<h2 class="section-label">{countLabel}</h2>
+					{rows.length > 0 ? (
+						<ul class="post-list">
+							{rows.map((row) => (
+								<li>
+									<h2>
+										{row.titleHtml ? (
+											<a href={row.path} set:html={row.titleHtml} />
+										) : (
+											<a href={row.path}>{row.title}</a>
+										)}
+									</h2>
+									{row.snippet && <p set:html={row.snippet} />}
+								</li>
+							))}
+						</ul>
+					) : (
+						<p class="empty">Nothing matched. Try fewer or different words.</p>
+					)}
+				</>
+			)
+		}
+	</div>
+</Base>

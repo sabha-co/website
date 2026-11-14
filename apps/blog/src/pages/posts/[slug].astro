@@ -1,0 +1,110 @@
+---
+import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash";
+import { Image, PortableText } from "emdash/ui";
+import Base from "../../layouts/Base.astro";
+import { formatDate } from "../../utils/locale";
+import { formatReadingTime, getReadingTime } from "../../utils/reading-time";
+import { resolveBlogSiteIdentity } from "../../utils/site-identity";
+import { url } from "../../utils/url";
+import "../../styles/prose.css";
+
+const slug = decodeSlug(Astro.params.slug);
+
+if (!slug) {
+	return Astro.rewrite("/404");
+}
+
+const { entry: post, cacheHint } = await getEmDashEntry("posts", slug);
+
+if (!post) {
+	return Astro.rewrite("/404");
+}
+
+if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+
+// The featured image's public URL, for the social card.
+function getImageUrl(img: unknown): string | undefined {
+	if (!img || typeof img !== "object") return undefined;
+	const image = img as Record<string, unknown>;
+	if (typeof image.src === "string" && image.src) {
+		return image.src.startsWith("http") ? image.src : `${Astro.url.origin}${image.src}`;
+	}
+	const meta = image.meta as Record<string, unknown> | undefined;
+	const storageKey =
+		(typeof meta?.storageKey === "string" ? meta.storageKey : undefined) ||
+		(typeof image.id === "string" ? image.id : undefined);
+	if (storageKey) {
+		return `${Astro.url.origin}/_emdash/api/media/file/${storageKey}`;
+	}
+	return undefined;
+}
+const featuredImageUrl = getImageUrl(post.data.featured_image);
+const { siteTitle } = resolveBlogSiteIdentity(await getSiteSettings());
+
+const seo = getSeoMeta(post, {
+	siteTitle,
+	siteUrl: Astro.url.origin,
+	path: Astro.url.pathname.replace(/\/$/, ""),
+	defaultOgImage: featuredImageUrl,
+});
+
+const authors = (post.data.bylines ?? []).map(({ byline }) => byline.displayName);
+const tags = post.data.terms?.tag ?? [];
+const category = post.data.terms?.category?.[0];
+const readingTime = formatReadingTime(getReadingTime(post.data.content));
+const publishedAt = post.data.publishedAt ?? null;
+---
+
+<Base
+	title={seo.title}
+	pageTitle={seo.ogTitle}
+	description={seo.description}
+	image={seo.ogImage}
+	canonical={seo.canonical}
+	robots={seo.robots}
+	type="article"
+	publishedTime={publishedAt?.toISOString()}
+	modifiedTime={post.data.updatedAt?.toISOString()}
+	author={authors[0]}
+	content={{ collection: "posts", id: post.data.id, slug }}
+>
+	<a slot="header-action" class="button" href={url("/")}>All posts</a>
+	<article class="post">
+		<header class="frame frame--post post__header">
+			<p class="meta">
+				<a href={url("/")}>Blog</a>
+				{category && " / "}
+				{category && <a href={url(`/category/${category.slug}`)}>{category.label}</a>}
+			</p>
+			<h1 class="post__title" {...post.edit.title}>{post.data.title}</h1>
+			<p class="meta">
+				{publishedAt && <time datetime={publishedAt.toISOString()}>{formatDate(publishedAt, "short")}</time>}
+				{publishedAt && " · "}
+				{readingTime}
+				{authors.length > 0 && ` · ${authors.join(", ")}`}
+			</p>
+		</header>
+		{
+			post.data.featured_image && (
+				<figure class="frame frame--post post__cover" {...post.edit.featured_image}>
+					<Image
+						image={post.data.featured_image}
+						alt={post.data.featured_image.alt || ""}
+						sizes="(min-width: 900px) 840px, 100vw"
+						priority
+					/>
+				</figure>
+			)
+		}
+		<div class="frame frame--text">
+			{post.data.excerpt && <p class="post__lead" {...post.edit.excerpt}>{post.data.excerpt}</p>}
+			<div class="prose" {...post.edit.content}>
+				<PortableText value={post.data.content} />
+			</div>
+			<footer class="post__footer">
+				{tags.map((tag) => <a href={url(`/tag/${tag.slug}`)}>#{tag.label}</a>)}
+				<a href={url("/rss.xml")}>Subscribe via RSS</a>
+			</footer>
+		</div>
+	</article>
+</Base>

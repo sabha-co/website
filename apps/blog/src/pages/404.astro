@@ -1,0 +1,19 @@
+---
+import Base from "../layouts/Base.astro";
+import { url } from "../utils/url";
+
+Astro.response.status = 404;
+---
+
+<Base title="Not found" robots="noindex">
+	<a slot="header-action" class="button" href={url("/")}>All posts</a>
+	<div class="frame frame--text page">
+		<h1 class="post__title">Not found</h1>
+		<p class="page-lead">There's nothing at this address.</p>
+		<form class="search-form" method="get" action={url("/search")} role="search">
+			<input type="search" name="q" placeholder="Search the blog" aria-label="Search the blog" />
+			<button type="submit">Search</button>
+		</form>
+		<a href={url("/")}>All posts →</a>
+	</div>
+</Base>
