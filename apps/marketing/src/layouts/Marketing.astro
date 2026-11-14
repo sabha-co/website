@@ -3,6 +3,7 @@ import Header from "@sabha/theme/Header.astro";
 import Footer from "@sabha/theme/Footer.astro";
 import { siteUrl } from "@sabha/theme/site";
 import "@sabha/theme/tokens.css";
+import "@fontsource-variable/inter/wght.css";
 import "../styles/landing.css";
 
 interface Props {
@@ -57,6 +58,12 @@ const ogImage = siteUrl("/_site/sabha-og.jpg");
 </html>
 
 <style is:global>
+  /* The marketing pages keep the Rails site's Inter, header and footer
+     included; the docs and blog use the theme's Instrument Sans. */
+  :root {
+    --font-body: "Inter Variable", system-ui, -apple-system, sans-serif;
+  }
+
   body {
     margin: 0;
     background: var(--sabha-color-bg);
