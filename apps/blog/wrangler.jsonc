@@ -11,20 +11,21 @@
 	// "/x*" rather than "/x/*": it also matches the bare "/x" and "/x?query"
 	// (route matching includes the query string).
 	//
-	// Both hosts for the admin handover (EmDash's "Continue on next.sabha.co"):
-	// existing passkeys only work on sabha.co until each admin registers one on
-	// next.sabha.co. Then drop the sabha.co routes and add the zone's
-	// sabha.co/blog* -> next.sabha.co/blog* Redirect Rule.
+	// Both hosts: the blog stays on sabha.co until the domain switch, and its
+	// admin lives there (see vars).
 	"routes": [
 		{ "pattern": "next.sabha.co/blog*", "zone_name": "sabha.co" },
 		{ "pattern": "next.sabha.co/_emdash*", "zone_name": "sabha.co" },
 		{ "pattern": "sabha.co/blog*", "zone_name": "sabha.co" },
 		{ "pattern": "sabha.co/_emdash*", "zone_name": "sabha.co" },
 	],
-	// Passkeys are bound to this host (EmDash takes the relying-party id from
-	// it), so never run setup at the workers.dev address.
+	// Passkeys are bound to EMDASH_SITE_URL's host (EmDash takes the
+	// relying-party id from it), so never run setup at the workers.dev address.
+	// It's sabha.co, the launch domain, so passkeys survive the switch;
+	// next.sabha.co is a subdomain, so the same passkeys work there too.
 	"vars": {
-		"EMDASH_SITE_URL": "https://next.sabha.co",
+		"EMDASH_SITE_URL": "https://sabha.co",
+		"EMDASH_ALLOWED_ORIGINS": "https://next.sabha.co",
 	},
 	"d1_databases": [
 		{

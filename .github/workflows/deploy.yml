@@ -1,9 +1,9 @@
 name: Deploy
 
 # Deploys one app to Cloudflare, by hand only, from main. The job runs in the
-# "production" environment, which holds the Cloudflare token and waits for a
-# reviewer's approval, so nothing ships without an explicit go-ahead and no PR
-# code ever sees the token. A smoke check against next.sabha.co follows.
+# "production" environment, which holds the Cloudflare token and only accepts
+# main, so no PR code ever sees the token. A smoke check against next.sabha.co
+# follows.
 #
 # Rolling back: `wrangler rollback` from the app's directory, or redeploy an
 # earlier commit by dispatching from it.

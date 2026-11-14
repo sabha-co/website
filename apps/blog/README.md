@@ -55,9 +55,6 @@ D1 has Time Travel (point-in-time restore for 30 days); R2 holds the uploads.
 
 ### Passkeys and the host
 
-EmDash binds passkeys to `EMDASH_SITE_URL`'s host (the relying-party id), so a passkey made on one host doesn't work on another, and setup must never run at the workers.dev address. Moving host:
+EmDash binds passkeys to `EMDASH_SITE_URL`'s host (the relying-party id), and setup must never run at the workers.dev address. `EMDASH_SITE_URL` is `https://sabha.co`, the launch domain, with `https://next.sabha.co` in `EMDASH_ALLOWED_ORIGINS`: a passkey made for sabha.co works on any of its subdomains, so the same passkeys sign in on both hosts and nothing changes at the domain switch. The admin's canonical address is `sabha.co/_emdash/admin`.
 
-1. Sign in on the old host first.
-2. Deploy with both hosts' routes and `EMDASH_SITE_URL` set to the new one.
-3. In Settings → General, select **Continue on <new host>**, then register a passkey there. Every admin does this.
-4. Deploy with only the new host's routes, and redirect the old paths at the zone.
+Moving to a host outside sabha.co would need a new passkey per admin: deploy with both hosts' routes and `EMDASH_SITE_URL` set to the new one, sign in on the old host, choose **Continue on <new host>** in Settings → General and register a passkey there.
