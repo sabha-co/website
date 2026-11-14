@@ -1,0 +1,36 @@
+---
+import Prose from "../layouts/Prose.astro";
+import { parseChangelog } from "../lib/changelog";
+import { GITHUB_URL } from "@sabha/theme/site";
+
+// Read at build time; scripts/sync-changelog.mjs refreshes the file first.
+const files = import.meta.glob<string>("../content/changelog.md", { query: "?raw", import: "default", eager: true });
+const sections = parseChangelog(Object.values(files)[0] ?? "");
+---
+
+<Prose
+  title="Changelog — Latest Updates & Features"
+  description="See what's new in Sabha. Latest updates, features, and improvements to the open source community chat platform."
+  label="CHANGELOG"
+  heading="What's new in Sabha"
+>
+  <div class="landing-changelog">
+    {sections.map((section) => (
+      <>
+        <h2>{section.heading}</h2>
+        <ul>
+          {section.items.map((item) => (
+            <li>
+              <strong>{item.title}</strong>
+              <span> — <Fragment set:html={item.description} /></span>
+            </li>
+          ))}
+        </ul>
+      </>
+    ))}
+  </div>
+
+  <p class="landing-page-note">
+    See the full changelog on <a href={`${GITHUB_URL}/blob/main/docs/CHANGELOG.md`} target="_blank" rel="noopener" class="landing-link">GitHub</a>.
+  </p>
+</Prose>

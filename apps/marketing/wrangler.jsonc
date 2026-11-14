@@ -1,0 +1,29 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "sabha-marketing",
+	// The Sabha account (ashwin@sabha.co's), which holds the sabha.co zone.
+	"account_id": "1948dc6c405b77891f2b25bc1018fefd",
+	"compatibility_date": "2026-11-13",
+	"main": "src/worker.ts",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS",
+		"not_found_handling": "none",
+		// Only the landing needs a decision; every other path is an asset.
+		"run_worker_first": ["/"],
+	},
+	// Exactly these paths reach this Worker; everything else on the host goes
+	// to Rails. A route without a wildcard matches that path alone.
+	"routes": [
+		{ "pattern": "next.sabha.co/", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/about", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/changelog", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/terms", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/privacy", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/openclaw", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/robots.txt", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/sitemap.xml", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/llms.txt", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/_site/*", "zone_name": "sabha.co" },
+	],
+}

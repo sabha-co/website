@@ -23,9 +23,18 @@ export const SECURITY_HEADERS = {
 // Rails' ActionDispatch::RequestId stamps every response; Workers never do.
 const RAILS_MARKER = "x-request-id";
 
+// Static sites send a bare directory to its slash form, where the index lives.
+const EXPECTED_REDIRECTS = { "/docs": "/docs/" };
+
 // The admin redirects to its sign-in (or setup), so a redirect is a pass there.
-const OK_STATUS = (path, status) =>
-  status >= 200 && status < 300 || (path.startsWith("/_emdash") && status >= 300 && status < 400);
+const OK_STATUS = (path, response) => {
+  const { status } = response;
+  if (status >= 200 && status < 300) return true;
+  if (status < 300 || status >= 400) return false;
+  if (path.startsWith("/_emdash")) return true;
+  const location = response.headers.get("location");
+  return location !== null && new URL(location, "https://x").pathname === EXPECTED_REDIRECTS[path];
+};
 
 export async function smoke({ app, base = "https://next.sabha.co", tenant, fetch = globalThis.fetch }) {
   const paths = CLAIMED_PATHS[app];
@@ -36,7 +45,7 @@ export async function smoke({ app, base = "https://next.sabha.co", tenant, fetch
 
   for (const path of paths) {
     const response = await get(path, { "user-agent": "sabha-website-smoke" });
-    if (!OK_STATUS(path, response.status)) failures.push(`${path}: status ${response.status}`);
+    if (!OK_STATUS(path, response)) failures.push(`${path}: status ${response.status}`);
     if (response.headers.has(RAILS_MARKER)) failures.push(`${path}: answered by Rails, not the ${app} Worker`);
 
     for (const [name, pattern] of Object.entries(SECURITY_HEADERS)) {

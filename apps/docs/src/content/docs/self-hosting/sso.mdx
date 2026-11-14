@@ -1,0 +1,224 @@
+---
+title: Single sign-on
+description: Sign people in to Sabha through the app where they already have an account.
+sidebar:
+  order: 3
+---
+
+If you already run a product, course site or company app where people sign in, Sabha can use that login. Members open Sabha and are signed in automatically: no second account, no extra password, no separate verification email. Their account on your app is their account on Sabha.
+
+Sabha speaks the [DiscourseConnect protocol](https://meta.discourse.org/t/setup-discourseconnect-official-single-sign-on-for-discourse-sso/13045). Sabha sends a visitor who isn't signed in to your app, your app signs them in and sends back a small signed description of who they are, and Sabha trusts it to open a session. It's the same protocol Discourse uses, so a provider you've built for Discourse works with Sabha unchanged.
+
+Single sign-on is for self-hosted workspaces.
+
+## Before you start
+
+You need:
+
+- A self-hosted Sabha workspace.
+- An app that can sign people in and serve a DiscourseConnect-compatible endpoint. This guide calls it your parent app.
+- A shared secret that only Sabha and your parent app know.
+- Verified email addresses in your parent app, or a provider that sends `require_activation=true` for unverified ones.
+
+Generate a strong secret:
+
+```bash
+openssl rand -hex 64
+```
+
+## Configure Sabha
+
+Set these environment variables:
+
+```bash
+AUTH_METHOD=sso
+SSO_PROVIDER_URL=https://app.example.com/sso
+SSO_SECRET=<shared-secret-from-openssl>
+
+# Optional profile sync. Both default to false.
+SSO_OVERRIDES_NAME=false
+SSO_OVERRIDES_AVATAR=false
+```
+
+The default Kamal configuration doesn't pass these variables to the app yet. Add `AUTH_METHOD`, `SSO_PROVIDER_URL`, `SSO_SECRET` and any `SSO_OVERRIDES_` settings you use to `env.secret` in `config/deploy.yml` and to `.kamal/secrets`, then run `kamal deploy`. See [Deploy Sabha](/self-hosting/deploy/#configuration).
+
+With single sign-on on:
+
+- Password sign-in, email-code sign-in and sign-in links all go through your parent app instead.
+- Password reset is turned off.
+- Apps keep working: their bot keys still authenticate against the API.
+
+## How the sign-in works
+
+When someone who isn't signed in visits Sabha, Sabha sends their browser to:
+
+```text
+SSO_PROVIDER_URL?sso=<base64-payload>&sig=<hmac-signature>
+```
+
+The payload contains:
+
+| Field | Description |
+| --- | --- |
+| `nonce` | A one-time value Sabha expects back. |
+| `return_sso_url` | Sabha's callback, usually `https://chat.example.com/session/sso/callback`. |
+
+Your parent app must:
+
+1. Verify `sig`: an HMAC-SHA256 of the exact `sso` parameter, keyed with the shared secret.
+2. Decode the base64 payload.
+3. Sign the person in.
+4. Build a response payload with at least `nonce`, `external_id` and `email`.
+5. Base64-encode the response payload.
+6. Sign the encoded payload the same way.
+7. Redirect to `return_sso_url?sso=<response-payload>&sig=<response-signature>`.
+
+### Required response fields
+
+| Field | Description |
+| --- | --- |
+| `nonce` | The nonce from Sabha's request. |
+| `external_id` | The person's id in your parent app. It must never change. Sabha ignores its case. |
+| `email` | The person's email address. |
+
+### Optional response fields
+
+| Field | Description |
+| --- | --- |
+| `name` | Used when creating the account. Updates existing accounts when `SSO_OVERRIDES_NAME=true`. |
+| `avatar_url` | Used when creating the account. Updates existing accounts when `SSO_OVERRIDES_AVATAR=true`. |
+| `require_activation` | Send `true` if your app hasn't verified the email. Sabha sends its own verification email and doesn't open a session until it's confirmed. |
+| `failed` | Send `true` to refuse the sign-in. |
+| `logout` | Send `true`, with a valid nonce, to end the person's Sabha session. |
+
+Sabha ignores roles, groups, admin flags, usernames, two-factor fields and custom fields.
+
+## Example provider
+
+Here's the shape of a provider action in a Rails app. Adapt the user lookup and sign-in checks to yours.
+
+```ruby
+require "base64"
+require "openssl"
+require "rack/utils"
+
+class SsoController < ApplicationController
+  SECRET = ENV.fetch("SABHA_SSO_SECRET")
+
+  def show
+    encoded_request = params.require(:sso)
+    signature = params.require(:sig)
+
+    unless secure_compare(signature, sign(encoded_request))
+      head :forbidden
+      return
+    end
+
+    request_payload = Rack::Utils.parse_query(Base64.decode64(encoded_request))
+    user = current_user || authenticate_parent_app_user!
+
+    response_payload = {
+      nonce: request_payload.fetch("nonce"),
+      external_id: user.id,
+      email: user.email,
+      name: user.name,
+      avatar_url: user.avatar_url,
+      require_activation: user.email_verified? ? "false" : "true"
+    }
+
+    encoded_response = Base64.strict_encode64(Rack::Utils.build_query(response_payload.compact))
+    redirect_to "#{request_payload.fetch("return_sso_url")}?#{Rack::Utils.build_query(sso: encoded_response, sig: sign(encoded_response))}", allow_other_host: true
+  end
+
+  private
+    def sign(payload)
+      OpenSSL::HMAC.hexdigest("sha256", SECRET, payload)
+    end
+
+    def secure_compare(value, expected)
+      value.present? &&
+        value.bytesize == expected.bytesize &&
+        ActiveSupport::SecurityUtils.secure_compare(value, expected)
+    end
+end
+```
+
+Use the same value for `SABHA_SSO_SECRET` in your parent app and `SSO_SECRET` in Sabha.
+
+## How people are matched to accounts
+
+When someone signs in, Sabha looks for their account in this order:
+
+1. An account already linked to their `external_id`.
+2. An active account with the same email, as long as `require_activation` isn't `true` and that account isn't linked to another `external_id`.
+3. Otherwise, a new account.
+
+So an existing workspace can switch to single sign-on without anyone recreating their account.
+
+<Aside type="danger" title="Email matching trusts your parent app">
+  If your parent app lets someone use `alice@example.com` without proving they own it, that person could take over Alice's existing Sabha account. To prevent it:
+
+  - Verify email ownership in your parent app before sending `require_activation=false`.
+  - Send `require_activation=true` for any unverified email.
+  - Don't let people change the email tied to an existing `external_id` unless the new address is verified.
+</Aside>
+
+## Turning it on in an existing workspace
+
+1. Confirm your parent app verifies email addresses.
+2. Add the provider endpoint to your parent app.
+3. Set `SSO_PROVIDER_URL` and `SSO_SECRET` in Sabha.
+4. Test the provider with a non-admin account on a staging copy.
+5. Set `AUTH_METHOD=sso`.
+6. Deploy, so Sabha restarts with the new settings.
+7. Test signing in, invite links, signing out and your apps.
+
+People who are already signed in stay signed in until their session expires or they sign out.
+
+## Invite links
+
+Invite links keep working with single sign-on. When someone opens an invite link, Sabha checks it, sends them through your parent app, and adds them to the workspace once they come back signed in. If the invite expires during that round trip, the sign-up is refused.
+
+## Turning it off
+
+1. Set `AUTH_METHOD=password` or `AUTH_METHOD=otp`.
+2. Deploy, so Sabha restarts.
+3. Check that signing in works.
+
+The links between accounts and `external_id`s stay in the database. They're harmless while single sign-on is off, and they're used again if you turn it back on.
+
+People whose accounts were created through single sign-on may never have had a Sabha password. If you switch back to passwords, they can set one with password reset.
+
+## Troubleshooting
+
+### "Single sign-on is not configured"
+
+Check that:
+
+- `AUTH_METHOD=sso` is set.
+- `SSO_PROVIDER_URL` is set.
+- `SSO_SECRET` is set.
+- Kamal passes all three to the app (they're listed under `env.secret` in `config/deploy.yml`), and you've deployed since changing them.
+
+### The callback returns 403
+
+Common causes:
+
+- The provider signed the decoded payload instead of the exact base64 `sso` value.
+- The provider used a different secret.
+- The provider changed whitespace or encoding before signing.
+- The nonce expired.
+- The callback opened in a different browser session from the one that started the sign-in.
+- The same callback URL was used again after a successful sign-in.
+
+### Someone gets a verification email instead of a session
+
+Your provider sent `require_activation=true`. Sabha sent its own verification email and opens a session once they confirm their address.
+
+### An existing member can't sign in
+
+Check whether their email is already linked to a different `external_id`. Sabha refuses ambiguous matches so no one can take over another person's account.
+
+### An invite link fails after signing in
+
+The invite may have expired or reached its usage limit during the round trip. Ask a workspace admin for a new invite link.

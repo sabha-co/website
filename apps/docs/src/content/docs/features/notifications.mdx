@@ -1,0 +1,90 @@
+---
+title: Notifications
+description: How Sabha tells you about mentions, direct messages and replies, in the app, by push and by email.
+sidebar:
+  order: 32
+---
+
+Sabha reaches you in four places:
+
+- **Activity**, inside Sabha, lists your mentions, thread replies and reactions to your messages.
+- **Push notifications** arrive on your phone or computer, even when Sabha is closed. See [Install and push notifications](/features/push-notifications/).
+- **Missed-notification email** collects the mentions and direct messages you missed while away into one email.
+- **The weekly digest** is a Monday recap of what happened in the workspace.
+
+## What reaches you where
+
+| What happened | Activity | Push | Email |
+|---|---|---|---|
+| Someone @mentioned you, or used `@everyone` | Yes | Yes | Yes |
+| Someone sent you a direct message | | Yes | Yes |
+| A new message in a room you follow with **All notifications** | | Yes | |
+| A reply in a thread or forum post you follow | Yes | Yes | |
+| Someone reacted to your message | Yes | | |
+
+Turning push or email off doesn't change what shows in Activity, so it's the place to catch up when you come back.
+
+## Choose how closely you follow each room
+
+Each room has a bell button with three levels:
+
+- **All notifications**: every new message.
+- **Mentions only**: just the messages that @mention you.
+- **Notifications muted**: nothing.
+
+Direct messages have **All notifications** and **Notifications muted**. You can see and change every room's level in one place, under **Per-room notifications** in your notification preferences.
+
+You follow a thread or forum post when you start it or reply to it. In forums you can also [follow a post](/features/forums/#follow-a-post) without replying.
+
+Nobody is notified about their own messages, and people who have [blocked](/features/permissions/#blocks-and-bans) each other aren't notified about each other.
+
+## Push notifications
+
+Turn push on or off with **Push notifications** in your notification preferences. It applies to all your devices.
+
+You won't get a push for a room you're looking at right now. If you have it open on any device, Sabha knows you've seen the message.
+
+## Missed-notification email
+
+If you're away from Sabha, the mentions and direct messages you miss are collected and sent as one email, instead of one email each.
+
+- Turn it on with **Email me when I'm mentioned or sent a DM while I'm away**. It's off by default.
+- Choose how they're bundled: **one hourly email** or **one daily email**.
+- "Away" means you haven't had Sabha open in this workspace for the past hour.
+- If you come back before the email goes out, it's cancelled: you've seen the messages already.
+- Anything that no longer applies when the email is due is left out: a deleted message, a room you've left, someone you've blocked.
+
+The subject line never names the sender or the room. Those appear only inside the email.
+
+## The weekly digest
+
+Once an administrator turns the digest on, everyone in the workspace receives it each Monday, until they turn off **Receive the weekly community digest**. It includes:
+
+- `@everyone` announcements you didn't see.
+- Rooms that were busy that week.
+- A few excerpts from shared conversations.
+
+The digest only draws on rooms you're in and can read. It never includes direct messages. If nothing qualifies, no digest is sent that week.
+
+## Unsubscribing
+
+Every email has an unsubscribe link. Missed-notification emails and the digest unsubscribe separately: leaving one doesn't affect the other. You can turn either back on in your notification preferences.
+
+## For administrators: turning email on
+
+Both kinds of email are off for the whole workspace until an administrator turns them on in **Account settings**:
+
+- **Send missed-notification emails**
+- **Send the weekly community digest**
+
+On a self-hosted workspace, these settings stay unavailable until email is set up: set `RESEND_API_KEY` and verify your sending domain with [Resend](https://resend.com). See [Deploy Sabha](/self-hosting/deploy/#configuration).
+
+Sabha doesn't automatically stop emailing addresses that bounce or report spam. Resend keeps its own suppression list for those.
+
+## What isn't supported
+
+- Email for thread replies or reactions.
+- Email settings per room.
+- Snooze or do-not-disturb. To go quiet, turn off push or email, or mute rooms.
+- Alerts for keywords.
+- Replying by email.

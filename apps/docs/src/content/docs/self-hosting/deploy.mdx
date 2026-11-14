@@ -1,0 +1,261 @@
+---
+title: Deploy Sabha
+description: Put Sabha on your own server with Kamal, then keep it updated, backed up and healthy.
+sidebar:
+  order: 1
+---
+
+Sabha deploys with [Kamal](https://kamal-deploy.org/), which gives you zero-downtime Docker deploys and a free Let's Encrypt certificate. Everything Sabha needs runs on one server: the app, its SQLite database, background jobs and the AnyCable WebSocket server. You pay only for the server.
+
+## What you need
+
+- A server running Ubuntu with Docker. Any VPS provider works (DigitalOcean, Hetzner, Linode and so on).
+- A domain name, such as `chat.yourdomain.com`, with a DNS record pointing at the server.
+- Docker and Kamal on your own computer. Install Kamal with `gem install kamal`.
+- An account on a container registry, such as GitHub Container Registry. Kamal builds the image on your computer and pushes it there.
+- A [Resend](https://resend.com) account with a verified sending domain, if you want sign-in codes and notification emails.
+
+| Resource | Minimum | Recommended |
+|----------|---------|-------------|
+| RAM | 2 GB | 4 GB |
+| CPU | 1 core | 2 cores |
+| Disk | 40 GB | 80 GB or more |
+| OS | Ubuntu 22.04 | Ubuntu 24.04 |
+
+## Deploy with Kamal
+
+<Steps>
+  <Step title="Prepare the server">
+    Install Docker and create the folder that will hold your data:
+
+    ```bash
+    ssh root@your-server "curl -fsSL https://get.docker.com | sh && mkdir -p /disk/sabha"
+    ```
+  </Step>
+  <Step title="Get the code">
+    ```bash
+    git clone https://github.com/sabha-co/sabha.git
+    cd sabha
+    ```
+  </Step>
+  <Step title="Point Kamal at your registry">
+    `config/deploy.yml` pushes to the Sabha project's own registry. Change `image` and `registry` to your account:
+
+    ```yaml title="config/deploy.yml"
+    image: your-user/sabha
+
+    registry:
+      server: ghcr.io
+      username: your-user
+      password:
+        - KAMAL_REGISTRY_PASSWORD
+    ```
+  </Step>
+  <Step title="Set your configuration">
+    `.kamal/secrets` reads every value from your shell environment. Copy `.env.sample` to `.env`, fill it in (see [Configuration](#configuration) below), and add the three values Kamal itself needs:
+
+    ```bash title=".env"
+    SERVER_IP=203.0.113.10
+    PROXY_HOST=chat.yourdomain.com
+    KAMAL_REGISTRY_PASSWORD=your_registry_token
+    ```
+
+    Then load it into your shell:
+
+    ```bash
+    set -a; source .env; set +a
+    ```
+  </Step>
+  <Step title="Deploy">
+    ```bash
+    kamal setup
+    ```
+
+    Kamal installs its proxy on the server, gets a certificate for `PROXY_HOST`, builds and pushes the image, and starts Sabha and its WebSocket server.
+  </Step>
+  <Step title="Create your account">
+    Open `https://chat.yourdomain.com`. The first visit shows a setup form: the name, email and password you enter there become the workspace's first administrator.
+  </Step>
+</Steps>
+
+<Aside type="caution" title="Cloudflare DNS">
+  If your domain is on Cloudflare, set its record to **DNS only** (grey cloud, not proxied). Cloudflare's proxy intercepts the Let's Encrypt challenge, so your server can't get its certificate.
+</Aside>
+
+## Configuration
+
+Sabha is configured with environment variables. Set them in `.env` and run `kamal deploy` to apply a change.
+
+```bash title=".env"
+# Your domain
+APP_HOST=chat.yourdomain.com
+COOKIE_DOMAIN=chat.yourdomain.com
+
+# Security (generate each with: openssl rand -hex 64)
+SECRET_KEY_BASE=your_secret_key_here
+ANYCABLE_SECRET=your_anycable_secret
+
+# Branding
+APP_NAME=My Team
+APP_SHORT_NAME=Team
+APP_DESCRIPTION=Where our team talks
+
+# Email (API key from resend.com)
+RESEND_API_KEY=your_resend_api_key
+SUPPORT_EMAIL=support@yourdomain.com
+MAILER_FROM_NAME=My Team
+MAILER_FROM_EMAIL=noreply@yourdomain.com
+
+# Web Push (generate with: npx web-push generate-vapid-keys)
+VAPID_PUBLIC_KEY=your_public_key
+VAPID_PRIVATE_KEY=your_private_key
+
+# Sign-in: "password" (default), "otp" (email codes) or "sso"
+AUTH_METHOD=password
+```
+
+| Variable | What it does |
+|---|---|
+| `APP_HOST` | Your domain, without `https://`. Used in links, emails and the WebSocket address. |
+| `COOKIE_DOMAIN` | The domain session cookies are set for. Usually the same as `APP_HOST`. |
+| `SECRET_KEY_BASE` | Signs sessions and cookies. Keep it secret and keep it stable. |
+| `ANYCABLE_SECRET` | Required. Secures the link between Sabha and its WebSocket server. Sabha won't start without it. |
+| `RESEND_API_KEY` | Sends email through Resend. Without it, email features stay off. |
+| `SUPPORT_EMAIL`, `MAILER_FROM_NAME`, `MAILER_FROM_EMAIL` | Where people reach you, and who your emails come from. |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Signs [push notifications](/features/push-notifications/). |
+| `AUTH_METHOD` | `password` (email and password), `otp` (a code sent by email) or `sso` ([single sign-on](/self-hosting/sso/)). |
+
+The name, icon and color variables are covered in [Branding](/self-hosting/branding/). A few more are optional:
+
+| Variable | What it does |
+|---|---|
+| `CLOUDFLARE_TURNSTILE_SITE_KEY`, `CLOUDFLARE_TURNSTILE_SECRET_KEY` | Adds a Cloudflare Turnstile check to the sign-up page. |
+| `DICEBEAR_ENABLED`, `DICEBEAR_HOST`, `DICEBEAR_STYLE` | Generated default avatars. On by default using the public DiceBear API; set `DICEBEAR_ENABLED=false` to use initials instead. |
+| `SENTRY_DSN` | Sends errors to your Sentry project. |
+| `DESKTOP_NOTIFICATIONS_ENABLED` | Set to `true` to send notifications and badge counts to the Sabha desktop app. |
+| `SABHA_HUB_SECRET` | Turns on [Continue with sabha.co](#continue-with-sabhaco). |
+
+<Aside type="caution" title="Kamal only passes the variables it lists">
+  `config/deploy.yml` names every variable that reaches the app under `env.secret`. If you set one that isn't listed there, such as `AUTH_METHOD`, the `SSO_` settings, `SENTRY_DSN` or the `DICEBEAR_` settings, add it to `env.secret` in `config/deploy.yml` and to `.kamal/secrets` (as `NAME=$NAME`), then deploy.
+</Aside>
+
+## WebSockets
+
+Live updates, typing indicators, presence and push decisions all run through [AnyCable](https://anycable.io), a WebSocket server that runs beside the app. The Kamal setup already includes it: an `anycable` accessory that serves `/cable` on your domain. You only need to set `ANYCABLE_SECRET`.
+
+Sabha needs AnyCable-Go 1.6.9 or newer. The `anycable/anycable-go:1.6` image in `config/deploy.yml` pulls the latest 1.6 release.
+
+If you want the client-facing tokens signed with a different secret from the server-to-server link, set `ANYCABLE_JWT_SECRET` and `ANYCABLE_STREAMS_SECRET` on both the app and the `anycable` accessory. Both fall back to `ANYCABLE_SECRET` when unset.
+
+### Running without Kamal
+
+Each release is published as a Docker image at `ghcr.io/sabha-co/sabha`, for `amd64` and `arm64`. If you run it some other way, you need to wire up what the Kamal setup provides:
+
+- A persistent volume mounted at `/rails/storage`. It holds the database and uploaded files.
+- The app container listens on port 3000 and answers health checks at `/up`.
+- An `anycable/anycable-go` (1.6.9 or newer) container with `ANYCABLE_RPC_HOST` pointing at the app's `/_anycable` endpoint (for example `http://sabha-web:3000/_anycable`), `ANYCABLE_BROADCAST_ADAPTER=http`, `ANYCABLE_BROKER=memory`, `ANYCABLE_PRESENCE_TTL=45` and the same `ANYCABLE_SECRET` as the app.
+- `ANYCABLE_BROADCAST_URL` on the app, pointing at AnyCable's `/_broadcast` endpoint (it defaults to `http://sabha-anycable:8080/_broadcast`).
+- A reverse proxy with HTTPS that sends `/cable` to AnyCable and everything else to the app. Run a single AnyCable instance: presence lives in its memory.
+
+`config/deploy.yml` in the repository is the reference for every setting above.
+
+## Updating
+
+```bash
+kamal deploy
+```
+
+Kamal builds the new version, starts it, and switches traffic over once it's healthy.
+
+## Everyday commands
+
+```bash
+kamal app logs -f      # Follow the app's logs
+kamal console          # Open a Rails console
+kamal shell            # Open a shell inside the app container
+kamal app stop         # Stop the app
+kamal app boot         # Start it again
+```
+
+## Backups
+
+Everything Sabha stores, the database and uploaded files, lives in `/disk/sabha` on the server. Back it up regularly, and copy the backups somewhere off the server, such as S3 or R2.
+
+To take a backup, first write any pending database changes into the main file, then archive the folder:
+
+```bash
+kamal app exec 'bin/rails runner "ActiveRecord::Base.connection.execute(%(PRAGMA wal_checkpoint(TRUNCATE)))"'
+ssh root@your-server "tar -czf /root/sabha-backup-$(date +%Y%m%d).tar.gz -C /disk/sabha ."
+```
+
+To restore, stop the app, unpack the archive over the folder and start it again:
+
+```bash
+kamal app stop
+ssh root@your-server "tar -xzf /root/sabha-backup.tar.gz -C /disk/sabha"
+kamal app boot
+```
+
+A daily cron job on the server that archives `/disk/sabha` and uploads it to object storage is a good default.
+
+## Monitoring
+
+Check that Sabha is up:
+
+```bash
+curl -f https://chat.yourdomain.com/up && echo "OK" || echo "FAIL"
+```
+
+Check the server's memory, disk and container usage:
+
+```bash
+ssh root@your-server "docker stats --no-stream && df -h && free -h"
+```
+
+## Database maintenance
+
+Sabha uses SQLite in WAL mode. To confirm the mode, or to compact the database after deleting a lot of data:
+
+```bash
+# Should print "wal"
+kamal app exec 'bin/rails runner "puts ActiveRecord::Base.connection.execute(%(PRAGMA journal_mode)).first[%(journal_mode)]"'
+
+# Compact the database
+kamal app exec 'bin/rails runner "ActiveRecord::Base.connection.execute(%(VACUUM))"'
+```
+
+To see how much space your data takes:
+
+```bash
+ssh root@your-server "du -sh /disk/sabha"
+```
+
+## sabha.co and the desktop app
+
+Sabha's desktop app, and sabha.co when a member adds your workspace to their list, find your server through `GET /api/manifest`. There's nothing to configure beyond a reachable HTTPS address.
+
+Members can keep your workspace in their sabha.co list, beside their other workspaces. After signing in, the sidebar offers once to add it (members can dismiss it for good), and their profile page keeps a link. sabha.co only reads your workspace's public name, logo and address. It never sees your members' accounts or sessions. To stop suggesting it, turn off **Suggest adding this workspace to sabha.co** in Account settings. Workspaces using their own single sign-on don't show it.
+
+### Continue with sabha.co
+
+You can also let members sign in with their sabha.co account. It's one more option beside your own password or email-code sign-in, and it stays off until you connect:
+
+<Steps>
+  <Step title="Add the workspace on sabha.co">
+    On sabha.co, click **+** in the sidebar, choose **Add a self-hosted workspace**, paste your workspace's address and tick **I run this workspace**. sabha.co shows a secret once. If the workspace is already in your list, use **Set up Continue with sabha.co** from its menu in Settings instead.
+  </Step>
+  <Step title="Give your server the secret">
+    Add it to `.env` as `SABHA_HUB_SECRET` and run `kamal deploy`.
+  </Step>
+  <Step title="Verify">
+    Click **Verify** on sabha.co. It checks that your workspace is running with the secret, then switches the option on.
+  </Step>
+</Steps>
+
+Your rules still apply. Someone new still needs your invite link. An existing member is never matched to a sabha.co account by email: they connect it from their own profile after signing in the usual way. sabha.co tells your workspace a member's name and email only after that member approves it once.
+
+To rotate the secret, use **Get a new secret** from the workspace's menu in sabha.co's Settings, deploy with the new secret and click **Verify** straight away; the option stops working in between. To turn it off, use **Disconnect from sabha.co** from the same menu. Members keep your workspace in their list and sign in the usual way. Workspaces using their own [single sign-on](/self-hosting/sso/) can't use this option.
+
+### Desktop notifications
+
+The Sabha desktop app can show notifications and a badge count, following the same rules as [push notifications](/features/push-notifications/). It's off until you set `DESKTOP_NOTIFICATIONS_ENABLED=true`.

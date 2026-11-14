@@ -1,0 +1,18 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "sabha-docs",
+	// The Sabha account (ashwin@sabha.co's), which holds the sabha.co zone.
+	"account_id": "1948dc6c405b77891f2b25bc1018fefd",
+	"compatibility_date": "2026-11-13",
+	// Assets only: the build is static and nests itself under /docs.
+	"assets": {
+		"directory": "./dist/client",
+		"not_found_handling": "404-page",
+	},
+	// Only /docs reaches this Worker; everything else on the host goes to
+	// Rails. "/docs/*" doesn't match the bare "/docs", so both.
+	"routes": [
+		{ "pattern": "next.sabha.co/docs", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/docs/*", "zone_name": "sabha.co" },
+	],
+}

@@ -1,0 +1,73 @@
+---
+import Header from "@sabha/theme/Header.astro";
+import Footer from "@sabha/theme/Footer.astro";
+import { siteUrl } from "@sabha/theme/site";
+import "@sabha/theme/tokens.css";
+import "@fontsource-variable/inter/wght.css";
+import "../styles/landing.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const DEFAULT_TITLE = "Sabha — Open Source Discord Alternative for Communities";
+const DEFAULT_DESCRIPTION =
+  "Simple, intentional chat for communities, without a subscription. Rooms, threads, DMs, search. Open source, free to use, free to leave.";
+
+const title = Astro.props.title ? `${Astro.props.title} | Sabha` : DEFAULT_TITLE;
+const description = Astro.props.description ?? DEFAULT_DESCRIPTION;
+// Pages build as about.html; the URL people share is /about.
+const canonical = siteUrl(Astro.url.pathname.replace(/(index)?\.html$/, ""));
+const ogImage = siteUrl("/_site/sabha-og.jpg");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Sabha" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="icon" href="/_site/sabha-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/_site/sabha-icon.svg" />
+    <slot name="head" />
+  </head>
+
+  <body>
+    <Header />
+    <main class="landing">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style is:global>
+  /* The marketing pages keep the Rails site's Inter, header and footer
+     included; the docs and blog use the theme's Instrument Sans. */
+  :root {
+    --font-body: "Inter Variable", system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    background: var(--sabha-color-bg);
+    color: var(--sabha-color-text);
+    font-family: var(--font-body);
+  }
+</style>
