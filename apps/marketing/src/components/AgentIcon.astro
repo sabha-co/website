@@ -1,0 +1,72 @@
+---
+// The agent's avatar in the landing's product pictures: the site icon's ink
+// tile, "s" and red dot, at the size of the avatars beside it.
+interface Props {
+  size?: "sm" | "md" | "lg";
+}
+
+const { size = "md" } = Astro.props;
+---
+
+<span class={`agent-icon agent-icon--${size}`}>s</span>
+
+<style>
+  .agent-icon {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 30px;
+    height: 30px;
+    padding: 0 4px 2px 0;
+    border-radius: 8px;
+    background: #202124;
+    color: #fff;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .agent-icon::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #ff3b30;
+  }
+
+  .agent-icon--sm {
+    width: 22px;
+    height: 22px;
+    padding: 0 3px 2px 0;
+    border-radius: 6px;
+    font-size: 15px;
+  }
+
+  .agent-icon--sm::after {
+    top: 4px;
+    right: 4px;
+    width: 4px;
+    height: 4px;
+  }
+
+  .agent-icon--lg {
+    width: 36px;
+    height: 36px;
+    padding: 0 5px 3px 0;
+    border-radius: 9px;
+    font-size: 25px;
+  }
+
+  .agent-icon--lg::after {
+    top: 7px;
+    right: 7px;
+    width: 6px;
+    height: 6px;
+  }
+</style>

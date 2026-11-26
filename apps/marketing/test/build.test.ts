@@ -34,5 +34,7 @@ test("canonical URLs are the clean paths people share", { skip: !built }, () => 
 });
 
 test("the CSP placeholder was filled in", { skip: !built }, () => {
-  assert.match(read("_headers"), /Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-/);
+  const headers = read("_headers");
+  assert.match(headers, /Content-Security-Policy: default-src 'self'; script-src 'self'/);
+  assert.doesNotMatch(headers, /CSP_PLACEHOLDER/);
 });

@@ -20,7 +20,7 @@ import { headerNav, SIGN_IN_PATH, SIGN_UP_PATH } from "./site";
 
     <div class="site-actions">
       <a href={SIGN_IN_PATH} class="site-sign-in">Sign in</a>
-      <a href={SIGN_UP_PATH} class="site-sign-up">Create your community</a>
+      <a href={SIGN_UP_PATH} class="site-sign-up">Create a workspace</a>
     </div>
 
     <button class="site-menu-toggle" popovertarget="site-menu" aria-label="Menu">
@@ -35,7 +35,7 @@ import { headerNav, SIGN_IN_PATH, SIGN_UP_PATH } from "./site";
       ))}
       <hr />
       <a href={SIGN_IN_PATH} class="site-sign-in">Sign in</a>
-      <a href={SIGN_UP_PATH} class="site-sign-up">Create your community</a>
+      <a href={SIGN_UP_PATH} class="site-sign-up">Create a workspace</a>
     </div>
   </nav>
 </header>
@@ -44,6 +44,7 @@ import { headerNav, SIGN_IN_PATH, SIGN_UP_PATH } from "./site";
   .site-header {
     background: var(--sabha-color-bg);
     font-family: var(--font-body);
+    line-height: 1.6;
   }
 
   .site-nav {
@@ -75,7 +76,7 @@ import { headerNav, SIGN_IN_PATH, SIGN_UP_PATH } from "./site";
   .site-links a {
     position: relative;
     font-size: var(--font-size-sm);
-    color: var(--sabha-color-text-secondary);
+    color: var(--sabha-color-muted);
     transition: color var(--ease);
   }
 
@@ -124,7 +125,11 @@ import { headerNav, SIGN_IN_PATH, SIGN_UP_PATH } from "./site";
   }
 
   .site-sign-up:hover {
-    opacity: 0.85;
+    opacity: 0.9;
+  }
+
+  .site-sign-up:active {
+    opacity: 0.8;
   }
 
   a:focus-visible,
