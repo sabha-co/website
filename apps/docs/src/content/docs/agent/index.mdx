@@ -1,0 +1,64 @@
+---
+title: The agent
+description: Sabha's built-in AI teammate. Mention it in a channel and it answers from the company brain, with links to the pages it used.
+sidebar:
+  order: 3
+  group:
+    label: The agent
+---
+
+Every workspace comes with one agent, shared by the whole team. It's called **Sabha Agent** until an administrator renames it. It answers from the [company brain](/agent/company-brain/), the wiki your team writes and corrects. It can also look things up in [the tools you connect](/agent/connections/), such as GitHub, Linear or Notion.
+
+The agent is built in. To bring an AI bot you already run, such as OpenClaw or Hermes, [add it as an app](/apps/ai-agents/) instead.
+
+## Ask it something
+
+Mention the agent in any open channel:
+
+```
+@Sabha Agent why are we on AnyCable and not ActionCable?
+```
+
+It replies in a thread under your message. Keep talking to it in that thread: once it has replied there, it answers each message in the thread without another mention.
+
+It reads open channels without being added to them, so it reaches every channel anyone on the team can join, including ones made later. Closed channels, forum posts and direct messages never reach it. If an open channel becomes closed, the agent loses it at once.
+
+## Every answer shows where it came from
+
+Under each reply, the agent lists what it used:
+
+- **From Team Wiki**: the wiki pages behind the answer. Open one to read the whole page, and fix it if it's wrong. The next person who asks gets the corrected answer.
+- **From GitHub (team account)**, or another connected tool: which tools it checked, and whose account it used.
+
+## When it writes
+
+The agent can propose changes, but nothing it proposes takes effect until a person says yes.
+
+- **A wiki page** it drafts or changes shows up as a card under its reply, with **Confirm**, **Edit** and **Not now**. Until someone confirms the change, the agent can't use it to answer anyone. See [Confirm what it writes](/agent/company-brain/#confirm-what-it-writes).
+- **A change in a connected tool**, such as closing an issue, waits for the person who asked to press **Confirm**. See [Reads and changes](/agent/connections/#reads-and-changes).
+
+## Settings
+
+Administrators look after the agent in **Settings → Agent**. It has three tabs:
+
+| Tab | What it holds |
+|---|---|
+| **Overview** | Its standing instructions, and the state of the company brain. |
+| **Model** | The AI model it runs on, and the providers it can use. See [Model and providers](/agent/model/). |
+| **Connections** | The tools it can reach with the team's account. See [Connections](/agent/connections/). |
+
+The top of the page shows whether the agent is answering. If it isn't, the page says why, such as no model provider connected or a provider's account out of credit, and offers the fix. While it's off, a mention gets a one-line note instead of an answer.
+
+### Name and color
+
+**Edit name** changes the word before "Agent" in its name, up to 8 letters or numbers. "Agent" always stays in the name, so nobody mistakes it for a person. The same dialog sets the color of its avatar.
+
+### Standing instructions
+
+The agent reads its standing instructions before every reply. Use them to say how it should talk, what to focus on and what to stay out of. Only administrators can change them.
+
+**Let it suggest** asks the agent to propose a voice and a name of its own, in a channel with the administrators.
+
+### Pause
+
+**Pause** stops new answers for everyone. Anything it's already writing finishes first. **Resume** turns it back on.

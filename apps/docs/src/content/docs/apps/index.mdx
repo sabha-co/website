@@ -1,13 +1,13 @@
 ---
 title: Apps
-description: Connect your own code, your tools and AI agents to Sabha through its apps API.
+description: Connect your own code, your tools and AI bots to Sabha through its apps API.
 sidebar:
   order: 20
   group:
     label: Apps
 ---
 
-An app is anything outside Sabha that takes part in your workspace: a CI notifier, a deploy button, an alert feed, an AI agent you run yourself. Each app appears in chat as its own bot user, with a name and an icon. People mention it, message it and click its buttons the way they would with a teammate.
+An app is anything outside Sabha that takes part in your workspace: a CI notifier, a deploy button, an alert feed, an AI bot you run yourself. Each app appears in chat as its own bot user, with a name and an icon. People mention it, message it and click its buttons the way they would with a teammate.
 
 The model is **events out, API in**. Sabha tells an app what happened, over a WebSocket the app opens or a webhook Sabha calls. The app acts by calling the API at `/api/v1` with its key. An app that uses the WebSocket needs no public address, so it can run on a laptop behind a home router.
 
@@ -16,7 +16,7 @@ The model is **events out, API in**. Sabha tells an app what happened, over a We
 | You want to | Use |
 |---|---|
 | Post into one channel from a script, CI or a monitoring tool | An [incoming webhook](/apps/incoming-webhooks/): a URL that only posts, with no key to protect |
-| Run an agent such as OpenClaw or Hermes | A [known app](/apps/ai-agents/): paste a few commands on the machine it runs on |
+| Run an AI bot such as OpenClaw or Hermes | A [known app](/apps/ai-agents/): paste a few commands on the machine it runs on |
 | Write your own app that listens, replies and shows buttons | [The apps API](/apps/quickstart/) |
 
 Every app starts with an administrator adding it in **Settings → Apps**. See [Add an app](/apps/add-an-app/).

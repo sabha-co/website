@@ -5,7 +5,7 @@ Sabha's public sites: marketing, docs and blog, three Astro apps deployed as thr
 ## Rules
 
 - **Never deploy without an explicit go-ahead.** No `wrangler deploy`, route change, secret change or D1/R2 write unless asked in that turn.
-- **This repo is public.** Nothing private goes in: no secrets, no `.env`, no internal plans. Docs describe Sabha as built in `sabha-ai`: read labels and behaviour from there, not from the public `sabha-co/sabha` repo, which lags it. The built-in agent and the wiki stay out of the docs for now.
+- **This repo is public.** Nothing private goes in: no secrets, no `.env`, no internal plans. Docs describe Sabha as built in `sabha-ai`: read labels and behaviour from there, not from the public `sabha-co/sabha` repo, which lags it. The docs say what the marketing site says: the built-in agent is "the agent", the wiki is "the company brain" (the app labels it Team Wiki), and outside AI agents a team brings are "bots".
 - **The host lives in `packages/theme/src/site.ts`.** Each `wrangler.jsonc` repeats it once in its routes and vars; change both together.
 - **Workers claim explicit paths, never `host/*`.** Each path comes as a pair: `/x` and `/x/*`. Anything unclaimed reaches Rails.
 - **Worker code never reads, logs or forwards cookies**, except the marketing root script's presence check. The sites share Rails' origin.

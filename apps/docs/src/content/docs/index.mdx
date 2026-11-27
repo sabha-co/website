@@ -1,47 +1,39 @@
 ---
-title: Sabha Docs
-description: Run Sabha, use it with your team, and connect apps to it.
+title: What is Sabha
+description: The agent-native, open-source alternative to Slack. Team chat with an AI agent built in.
 sidebar:
   order: 0
   label: Introduction
 ---
 
-Sabha is open-source team chat: channels, threads, direct messages and forums, made for small teams who spend their workday in it. You can run it on your own server or use it on [sabha.co](https://sabha.co).
+Sabha has the team chat you'd expect: channels, threads, direct messages and forums. Its agent answers your team's questions from the company brain, a wiki your team writes and corrects, and links the pages it used. When an answer is wrong, you fix the page once, and everyone after you gets the right answer.
 
-These docs cover four things.
+Use it on [sabha.co](https://sabha.co), or run it on your own server. It's open source under the MIT license.
 
-## Running a workspace
+<CardGrid>
+  <Card title="The agent" icon="ph:sparkle" href="/agent/">
+    Ask it in any open channel. It answers from the company brain and links the pages it used.
+  </Card>
+  <Card title="The company brain" icon="ph:book-open" href="/agent/company-brain/">
+    The wiki the agent answers from. The agent drafts pages, and a person confirms them.
+  </Card>
+  <Card title="Running a workspace" icon="ph:users" href="/workspace/">
+    For administrators: invite people, manage members and roles, bring history in from Slack.
+  </Card>
+  <Card title="Self-hosting" icon="ph:hard-drives" href="/self-hosting/">
+    Deploy Sabha on a server you control, with your own name, colors and sign-in.
+  </Card>
+  <Card title="Apps and bots" icon="ph:plugs" href="/apps/">
+    Connect CI, alerts and your own code, or bring the AI bots you already run, like OpenClaw and Hermes.
+  </Card>
+  <Card title="Features" icon="ph:chats" href="/features/forums/">
+    How forums and notifications work, and how to set up push on your phone or computer.
+  </Card>
+</CardGrid>
 
-For administrators, on sabha.co or your own server.
+## New to Sabha
 
-- [Invite people](/workspace/invitations/) with the join link.
-- [Manage members](/workspace/members/): roles, badges, deactivating and banning.
-- [Roles and permissions](/workspace/permissions/): who can do what.
-- [Import from Slack](/workspace/slack-import/).
-- [Export, move or delete](/workspace/export/) a sabha.co workspace.
-
-## Self-hosting
-
-Put Sabha on a server you control, give it your name and colors, and connect it to the login your team already uses.
-
-- [Deploy Sabha](/self-hosting/deploy/) with Kamal, then keep it updated and backed up.
-- [Branding](/self-hosting/branding/): your name, icons and colors.
-- [Single sign-on](/self-hosting/sso/) through your own app.
-
-## Apps
-
-Connect your own code, your tools and AI agents. Each app appears in chat as its own bot user.
-
-- [Apps](/apps/): what an app can do, and the three ways to connect one.
-- [Add an app](/apps/add-an-app/): create it, choose its channels and decide what it may do.
-- [Build an app](/apps/quickstart/): post a message, then listen for mentions and reply.
-- [Incoming webhooks](/apps/incoming-webhooks/) for CI, cron and monitoring.
-- [Bring an AI agent](/apps/ai-agents/) such as OpenClaw or Hermes.
-
-## Features
-
-How the parts of Sabha work, for the people using them every day.
-
-- [Forums](/features/forums/) for longer, titled discussions.
-- [Notifications](/features/notifications/): Activity, push and email.
-- [Install and push notifications](/features/push-notifications/) on your phone or computer.
+1. [Create a workspace](https://sabha.co) and [invite your team](/workspace/invitations/).
+2. Answer the agent's questions in [Getting started](/agent/company-brain/#getting-started), and confirm the first pages it drafts.
+3. [Mention the agent](/agent/#ask-it-something) in a channel and ask it something.
+4. Moving from Slack? A self-hosted workspace can [import your export](/workspace/slack-import/), and your [Slack apps](/apps/slack/) move over with small changes.

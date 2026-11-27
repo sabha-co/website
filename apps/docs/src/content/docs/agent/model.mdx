@@ -1,0 +1,56 @@
+---
+title: Model and providers
+description: Choose the AI model the agent runs on, and connect the provider account that pays for it.
+sidebar:
+  order: 2
+---
+
+The agent thinks with a model from a provider you choose, such as Anthropic, OpenAI or Google. The provider runs the model; Sabha keeps the knowledge, the permissions and the reply. Switching models or providers changes nothing in the company brain.
+
+Both live in **Settings → Agent → Model**.
+
+## The free trial on sabha.co
+
+A workspace on sabha.co starts with Sabha's free trial: a model key Sabha manages, so the agent answers from the first day. It shows under **Providers** as **Sabha's free trial**, with what's left of it.
+
+When the trial ends, the agent stops answering until you connect a provider of your own, or move the workspace to [Sabha Cloud Deploy](/workspace/export/). Chat and the wiki keep working either way.
+
+A self-hosted workspace has no trial. Connect a provider before the agent can answer.
+
+## Connect a provider
+
+<Steps>
+  <Step title="Open the form">
+    In **Settings → Agent → Model**, click **Connect a provider**.
+  </Step>
+  <Step title="Pick the provider">
+    Choose one of the providers below, and paste its API key.
+  </Step>
+  <Step title="Test and save">
+    **Test & save** checks the key with the provider before saving it. Sabha stores the key encrypted and never shows it again.
+  </Step>
+</Steps>
+
+| Provider | What you need |
+|---|---|
+| **Anthropic** | An API key from the Claude Console. |
+| **OpenAI** | An API key from the OpenAI platform. |
+| **Google** | An API key from Google AI Studio. |
+| **OpenRouter** | An OpenRouter key. OpenRouter serves models from many providers through one key. |
+| **OpenAI-compatible server** | The address of a server on the internet that answers the OpenAI chat API, and its key if it needs one. |
+
+Connect one key per provider. To use a new key, choose **Replace key** on the provider's row.
+
+## Choose the model
+
+**Change**, beside the current model, lists the models of every connected provider, with their prices per million tokens (input, then output). An answer usually costs a few cents. Anthropic, OpenAI and Google each have a model marked **Default**.
+
+On an OpenAI-compatible server, type the model's name as the server knows it, such as `llama3.3`. The model needs to support tool calling, since that's how it reads the wiki.
+
+## Spending
+
+You pay the provider directly, on your own account with them. To cap what the agent can spend, set a limit on the key at the provider. If the account runs out of credit, the agent stops answering and **Settings → Agent** says so. Top up the account, then click **Resume**.
+
+## Remove a provider
+
+**Remove** deletes the provider's key from Sabha. You can't remove the provider the agent is using; choose a model from another provider first.

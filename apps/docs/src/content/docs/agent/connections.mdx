@@ -1,0 +1,38 @@
+---
+title: Connections
+description: Let the agent reach GitHub, Linear, Notion and other tools through their own MCP servers, with the team's account or a member's own.
+sidebar:
+  order: 3
+---
+
+Connections let the agent look things up in the tools your team already uses: the state of a pull request, an issue's assignee, a Notion page. It reaches each tool through that vendor's own hosted [MCP](https://modelcontextprotocol.io) server.
+
+The Sabha team curates the list. You can't add a tool by URL.
+
+| Group | Tools |
+|---|---|
+| **Work tools** | GitHub, Linear, Notion, Atlassian (Jira and Confluence), Basecamp, Sentry and PostHog |
+| **Web search** | Exa and Firecrawl |
+
+## The team's account
+
+An administrator connects a tool in **Settings → Agent → Connections**: click **Connect**, then sign in at the vendor or paste a token, depending on the tool.
+
+Everyone who mentions the agent can reach whatever that account can see, and the answer lands in a channel. So connect an account made for the agent, one that sees only what the whole team should share.
+
+Click a connected tool to see its tools, and switch off any you don't want the agent to use. **Disconnect** turns the tool off for everyone, members' own accounts included, until it's connected again.
+
+## Your own account
+
+Once a work tool is connected for the team, each member can add their own account in **Your settings → Connections**. When you ask, the agent uses your account instead of the team's, so it reaches what you can see. It never uses your account for anyone else.
+
+**Disconnect** there puts you back on the team's account, and Sabha forgets your sign-in. Your account at the vendor stays as it is.
+
+Web search always runs on the team's account, since the web looks the same whoever asks.
+
+## Reads and changes
+
+- **Reads happen straight away.** Looking something up needs no confirmation.
+- **Changes wait for the person who asked.** Before the agent comments, closes an issue or changes anything else, it shows a card with **Confirm** and **Cancel**. Only the person whose question it's acting on can answer it. A request left too long expires; ask again.
+
+Under each reply, the agent names the tools it used and whose account it used for each.
