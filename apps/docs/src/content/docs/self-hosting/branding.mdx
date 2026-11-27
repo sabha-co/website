@@ -1,56 +1,44 @@
 ---
 title: Branding
-description: Give your workspace its own name, icons, colors and email sender.
+description: Give your workspace its own name, logo, colors, icons and email address.
 sidebar:
   order: 2
 ---
 
-Your members should see your workspace, not a generic chat app. Sabha's branding comes from a handful of environment variables and image files, plus a logo you can upload from the app.
+A self-hosted Sabha is one workspace, and the workspace brands it. Most of its branding is set in the app, with no deploy. The server supplies only its address, the address it sends email from, and a few image files.
+
+## In the app
+
+You name the workspace when you first set Sabha up. Administrators change its name, logo and accent color in **Settings → Identity**. See [Name, logo and email](/workspace/identity/).
+
+| Setting | Where it shows |
+|---|---|
+| Name | Page titles, the sign-in and join pages, link previews, the installed app's name, email subjects and the email sender's name |
+| Logo | The sidebar, the sign-in and join pages, the browser tab icon in browsers that don't use the SVG icon, the iPhone home-screen icon and the installed app's icon |
+| Accent color | Links, selections and highlights everywhere, and the browser's theme color |
+
+The logo can be JPEG, PNG, GIF or WebP. Without one, Sabha shows the name's first letter on the accent color. The logo doesn't change the SVG tab icon or the link-preview images; replace those [files](#icon-and-image-files) to brand them too.
+
+### Signing in with single sign-on
+
+If your first administrator arrives through [single sign-on](/self-hosting/sso/), there's no setup form to name the workspace. It takes its name from `BOOTSTRAP_WORKSPACE_NAME`, read once at that moment, or "Sabha" if that's unset. Rename it in Settings afterwards.
 
 ## Environment variables
 
-Set these in your `.env` file, then run `kamal deploy` to apply them. See [Deploy Sabha](/self-hosting/deploy/#configuration) for how configuration reaches the server.
+Set these in your `.env` file, then run `kamal deploy`. See [Deploy Sabha](/self-hosting/deploy/#configuration).
 
-### Name and address
+### Address and email
 
 ```bash
-# Your workspace's name: page titles, emails, sign-in pages, the installed app
-APP_NAME="Northwind Studio"
-
-# Short name under the icon on a phone's home screen (keep it under 12 characters)
-APP_SHORT_NAME="Northwind"
-
-# Description for the installed app and page metadata
-APP_DESCRIPTION="Where the Northwind team talks"
-
-# Your domain, without https://
+# Your domain, without https://. Required: Sabha won't start without it.
 APP_HOST="chat.northwind.studio"
-```
 
-### Contact and email sender
-
-```bash
-# Shown in error messages and help pages
-SUPPORT_EMAIL="support@northwind.studio"
-
-# The "From" on outgoing email: sign-in codes, notifications and so on
-MAILER_FROM_NAME="Northwind Studio"
+# The address email is sent from. Your email provider must have verified it.
+# Email shows the workspace's name as the sender.
 MAILER_FROM_EMAIL="noreply@northwind.studio"
 ```
 
-### Installed app colors
-
-These color the mobile browser's address bar and the splash screen of the [installed app](/features/push-notifications/). They don't change the colors inside Sabha.
-
-```bash
-# Address bar and app theme (default: #1d4ed8)
-THEME_COLOR="#1d4ed8"
-
-# Splash screen background (default: #ffffff)
-BACKGROUND_COLOR="#ffffff"
-```
-
-Use your brand's main color for `THEME_COLOR`, and make sure it contrasts well with `BACKGROUND_COLOR`.
+Without `MAILER_FROM_EMAIL`, Sabha sends from `noreply@` your `APP_HOST`.
 
 ### Analytics
 
@@ -65,21 +53,17 @@ UMAMI_WEBSITE_ID="your-website-id"
 
 ### Embedding
 
-To allow other sites to show Sabha in an iframe, list them here, separated by commas. By default only your own domain and its subdomains can.
+By default only your own domain and its subdomains can show Sabha in an iframe. To allow other sites, list every site that may, separated by commas:
 
 ```bash
-CSP_FRAME_ANCESTORS="https://northwind.studio, https://*.northwind.studio"
+CSP_FRAME_ANCESTORS="https://chat.northwind.studio, https://*.northwind.studio, https://intranet.northwind.studio"
 ```
 
-## Logo
-
-Administrators can upload a logo at the top of **Account settings**. It takes effect right away, without a deploy, and replaces the default app icon everywhere it appears: in the app, as the browser tab icon in browsers that don't use the SVG icon, as the iPhone home-screen icon and as the installed app's icon.
-
-The uploaded logo doesn't change the SVG tab icon or the link-preview images. Replace those files, below, if you want them branded too.
+The list replaces the default, so include your own domain if Sabha should still be able to frame itself.
 
 ## Icon and image files
 
-To change the defaults themselves, replace these files in your copy of the repository and deploy. Other images in the repository aren't used for icons.
+To change the default icons and images, replace these files in your copy of the repository and deploy. Other images in the repository aren't used for icons.
 
 ### Browser tab icon
 
@@ -89,7 +73,7 @@ To change the defaults themselves, replace these files in your copy of the repos
 
 ### App icon
 
-These cover browsers without SVG icon support, the iPhone home-screen icon and the installed app. Replace both. They're also what Sabha shows when no logo has been uploaded.
+These cover browsers without SVG icon support, the iPhone home-screen icon and the installed app, while no logo has been uploaded. Replace both.
 
 | File | Size | Purpose |
 |------|------|---------|
@@ -105,36 +89,16 @@ Shown when someone shares a link to your workspace in another app or on social m
 | `public/sabha-og.jpg` | 1200×630 | The preview card image |
 | `public/icon.png` | 512×512 | The preview logo |
 
-## Example
-
-```bash
-APP_NAME="Startup Founders Club"
-APP_SHORT_NAME="SFC"
-APP_DESCRIPTION="A place for early-stage founders"
-APP_HOST="chat.startupfounder.club"
-SUPPORT_EMAIL="help@startupfounder.club"
-MAILER_FROM_NAME="Startup Founders Club"
-MAILER_FROM_EMAIL="noreply@startupfounder.club"
-THEME_COLOR="#10b981"
-BACKGROUND_COLOR="#ffffff"
-```
-
 ## Troubleshooting
 
 ### Changes don't appear
 
-Environment variables are read when Sabha starts. Run `kamal deploy` after changing them.
+Environment variables are read when Sabha starts. Run `kamal deploy` after changing them. Changes in Settings → Identity apply straight away.
 
 ### Icons don't update
 
 Replaced files only take effect after a deploy, because the image is rebuilt with them. Then clear your browser cache or check in a private window. For the installed app, remove it and install it again.
 
-### The email sender name doesn't change
+### Email comes from the wrong name or address
 
-1. Check that both `MAILER_FROM_NAME` and `MAILER_FROM_EMAIL` are set.
-2. Deploy again so Sabha picks them up.
-3. Make sure the sending domain is verified with your email provider. Some providers won't send from an unverified domain.
-
-## Need help?
-
-Open an issue on [GitHub](https://github.com/sabha-co/sabha/issues).
+The sender's name is the workspace's name: rename the workspace in Settings → Identity, with no deploy. The address is `MAILER_FROM_EMAIL`. Check it's set and that your email provider has verified it, then deploy. **Settings → About** can send you a test email.

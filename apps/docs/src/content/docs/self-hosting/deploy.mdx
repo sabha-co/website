@@ -26,10 +26,10 @@ Sabha deploys with [Kamal](https://kamal-deploy.org/), which gives you zero-down
 
 <Steps>
   <Step title="Prepare the server">
-    Install Docker and create the folder that will hold your data:
+    Install Docker and create the folder that will hold your data. Sabha runs as an unprivileged user inside its container (UID 999), so that user has to own the folder:
 
     ```bash
-    ssh root@your-server "curl -fsSL https://get.docker.com | sh && mkdir -p /disk/sabha"
+    ssh root@your-server "curl -fsSL https://get.docker.com | sh && mkdir -p /disk/sabha && chown -R 999:999 /disk/sabha"
     ```
   </Step>
   <Step title="Get the code">
@@ -39,7 +39,7 @@ Sabha deploys with [Kamal](https://kamal-deploy.org/), which gives you zero-down
     ```
   </Step>
   <Step title="Point Kamal at your registry">
-    `config/deploy.yml` pushes to the Sabha project's own registry. Change `image` and `registry` to your account:
+    `config/deploy.yml` pushes to the Sabha project's own registry. Change `image`, `registry` and the build cache to your account, and `arch` to match your server:
 
     ```yaml title="config/deploy.yml"
     image: your-user/sabha
@@ -49,7 +49,15 @@ Sabha deploys with [Kamal](https://kamal-deploy.org/), which gives you zero-down
       username: your-user
       password:
         - KAMAL_REGISTRY_PASSWORD
+
+    builder:
+      arch: amd64          # arm64 for an ARM server
+      cache:
+        type: registry
+        image: your-user/sabha-build-cache
     ```
+
+    Or delete the `cache` block: builds then take a few minutes longer.
   </Step>
   <Step title="Set your configuration">
     `.kamal/secrets` reads every value from your shell environment. Copy `.env.sample` to `.env`, fill it in (see [Configuration](#configuration) below), and add the three values Kamal itself needs:
@@ -74,7 +82,9 @@ Sabha deploys with [Kamal](https://kamal-deploy.org/), which gives you zero-down
     Kamal installs its proxy on the server, gets a certificate for `PROXY_HOST`, builds and pushes the image, and starts Sabha and its WebSocket server.
   </Step>
   <Step title="Create your account">
-    Open `https://chat.yourdomain.com`. The first visit shows a setup form: the name, email and password you enter there become the workspace's first administrator.
+    Open `https://chat.yourdomain.com`. The first visit shows a setup form. Name the workspace, choose **Workspace** (internal, for people who work together) or **Community** (public-facing, for a group or audience), which can't be changed later, and enter the name, email and password of its first administrator.
+
+    With `AUTH_METHOD=sso` there's no form: the first person to sign in through your parent app becomes the administrator. See [Single sign-on](/self-hosting/sso/#a-new-install).
   </Step>
 </Steps>
 
@@ -84,7 +94,7 @@ Sabha deploys with [Kamal](https://kamal-deploy.org/), which gives you zero-down
 
 ## Configuration
 
-Sabha is configured with environment variables. Set them in `.env` and run `kamal deploy` to apply a change.
+Sabha is configured with environment variables. Set them in `.env` and run `kamal deploy` to apply a change. Sabha won't start without `APP_HOST`, `SECRET_KEY_BASE` and `ANYCABLE_SECRET`.
 
 ```bash title=".env"
 # Your domain
@@ -95,15 +105,8 @@ COOKIE_DOMAIN=chat.yourdomain.com
 SECRET_KEY_BASE=your_secret_key_here
 ANYCABLE_SECRET=your_anycable_secret
 
-# Branding
-APP_NAME=My Team
-APP_SHORT_NAME=Team
-APP_DESCRIPTION=Where our team talks
-
 # Email (API key from resend.com)
 RESEND_API_KEY=your_resend_api_key
-SUPPORT_EMAIL=support@yourdomain.com
-MAILER_FROM_NAME=My Team
 MAILER_FROM_EMAIL=noreply@yourdomain.com
 
 # Web Push (generate with: npx web-push generate-vapid-keys)
@@ -116,16 +119,16 @@ AUTH_METHOD=password
 
 | Variable | What it does |
 |---|---|
-| `APP_HOST` | Your domain, without `https://`. Used in links, emails and the WebSocket address. |
+| `APP_HOST` | Required. Your domain, without `https://`. Used in links, emails and the WebSocket address, and the only host Sabha answers to. |
+| `SECRET_KEY_BASE` | Required. Signs sessions and cookies, and encrypts stored secrets. Keep it secret and keep it stable. |
+| `ANYCABLE_SECRET` | Required. Secures the link between Sabha and its WebSocket server. |
 | `COOKIE_DOMAIN` | The domain session cookies are set for. Usually the same as `APP_HOST`. |
-| `SECRET_KEY_BASE` | Signs sessions and cookies. Keep it secret and keep it stable. |
-| `ANYCABLE_SECRET` | Required. Secures the link between Sabha and its WebSocket server. Sabha won't start without it. |
-| `RESEND_API_KEY` | Sends email through Resend. Without it, email features stay off. |
-| `SUPPORT_EMAIL`, `MAILER_FROM_NAME`, `MAILER_FROM_EMAIL` | Where people reach you, and who your emails come from. |
+| `RESEND_API_KEY` | Sends email through Resend. Without it, email features stay off, and email-code sign-in can't work. |
+| `MAILER_FROM_EMAIL` | The address emails come from, verified with your email provider. Defaults to `noreply@` your `APP_HOST`. The sender's name is the workspace's. |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Signs [push notifications](/features/push-notifications/). |
 | `AUTH_METHOD` | `password` (email and password), `otp` (a code sent by email) or `sso` ([single sign-on](/self-hosting/sso/)). |
 
-The name, icon and color variables are covered in [Branding](/self-hosting/branding/). A few more are optional:
+The workspace's name, logo and color are set in the app; the analytics and embedding variables are in [Branding](/self-hosting/branding/). A few more are optional:
 
 | Variable | What it does |
 |---|---|
@@ -136,7 +139,7 @@ The name, icon and color variables are covered in [Branding](/self-hosting/brand
 | `SABHA_HUB_SECRET` | Turns on [Continue with sabha.co](#continue-with-sabhaco). |
 
 <Aside type="caution" title="Kamal only passes the variables it lists">
-  `config/deploy.yml` names every variable that reaches the app under `env.secret`. If you set one that isn't listed there, such as `AUTH_METHOD`, the `SSO_` settings, `SENTRY_DSN` or the `DICEBEAR_` settings, add it to `env.secret` in `config/deploy.yml` and to `.kamal/secrets` (as `NAME=$NAME`), then deploy.
+  `config/deploy.yml` names every variable that reaches the app under `env.secret`. If you set one that isn't listed there, such as `AUTH_METHOD`, the `SSO_` settings or the `DICEBEAR_` settings, add it to `env.secret` in `config/deploy.yml` and to `.kamal/secrets` (as `NAME=$NAME`), then deploy.
 </Aside>
 
 ## WebSockets
@@ -145,7 +148,7 @@ Live updates, typing indicators, presence and push decisions all run through [An
 
 Sabha needs AnyCable-Go 1.6.9 or newer. The `anycable/anycable-go:1.6` image in `config/deploy.yml` pulls the latest 1.6 release.
 
-If you want the client-facing tokens signed with a different secret from the server-to-server link, set `ANYCABLE_JWT_SECRET` and `ANYCABLE_STREAMS_SECRET` on both the app and the `anycable` accessory. Both fall back to `ANYCABLE_SECRET` when unset.
+If you want the client-facing tokens signed with a different secret from the server-to-server link, set `ANYCABLE_JWT_SECRET` and `ANYCABLE_STREAMS_SECRET` to the same new value, on both the app and the `anycable` accessory, and add both to `env.secret` and `.kamal/secrets`. Unset, they fall back to `ANYCABLE_SECRET`.
 
 ### Running without Kamal
 
@@ -153,25 +156,37 @@ Each release is published as a Docker image at `ghcr.io/sabha-co/sabha`, for `am
 
 - A persistent volume mounted at `/rails/storage`. It holds the database and uploaded files.
 - The app container listens on port 3000 and answers health checks at `/up`.
-- An `anycable/anycable-go` (1.6.9 or newer) container with `ANYCABLE_RPC_HOST` pointing at the app's `/_anycable` endpoint (for example `http://sabha-web:3000/_anycable`), `ANYCABLE_BROADCAST_ADAPTER=http`, `ANYCABLE_BROKER=memory`, `ANYCABLE_PRESENCE_TTL=45` and the same `ANYCABLE_SECRET` as the app.
+- An `anycable/anycable-go` (1.6.9 or newer) container with `ANYCABLE_RPC_HOST` pointing at the app's `/_anycable` endpoint (for example `http://sabha-web:3000/_anycable`), `ANYCABLE_PATH=/cable`, `ANYCABLE_BROADCAST_ADAPTER=http`, `ANYCABLE_HTTP_BROADCAST_PORT=8080`, `ANYCABLE_BROKER=memory`, `ANYCABLE_PRESENCE_TTL=45`, `ANYCABLE_HEADERS=cookie,authorization` and the same `ANYCABLE_SECRET` as the app. Without `authorization` in the headers, [apps](/apps/) can't connect.
 - `ANYCABLE_BROADCAST_URL` on the app, pointing at AnyCable's `/_broadcast` endpoint (it defaults to `http://sabha-anycable:8080/_broadcast`).
-- A reverse proxy with HTTPS that sends `/cable` to AnyCable and everything else to the app. Run a single AnyCable instance: presence lives in its memory.
+- A reverse proxy with HTTPS that sends `/cable` to AnyCable, keeping the `/cable` prefix on the request, and everything else to the app. Run a single AnyCable instance: presence lives in its memory.
+
+HTTPS isn't optional: over plain HTTP, people can sign in but can't post.
 
 `config/deploy.yml` in the repository is the reference for every setting above.
 
 ## Updating
 
+Get the new version's code, then deploy it:
+
 ```bash
+git pull
 kamal deploy
 ```
 
-Kamal builds the new version, starts it, and switches traffic over once it's healthy.
+Kamal builds the new version from your checkout, starts it, and switches traffic over once it's healthy.
+
+`kamal deploy` doesn't restart the WebSocket server. To pick up a newer AnyCable release, or a changed `ANYCABLE_SECRET`, restart it too:
+
+```bash
+kamal accessory reboot anycable
+```
 
 ## Everyday commands
 
 ```bash
-kamal app logs -f      # Follow the app's logs
+kamal logs             # Follow the app's logs
 kamal console          # Open a Rails console
+kamal dbc              # Open a database console
 kamal shell            # Open a shell inside the app container
 kamal app stop         # Stop the app
 kamal app boot         # Start it again
@@ -179,13 +194,14 @@ kamal app boot         # Start it again
 
 ## Backups
 
-Everything Sabha stores, the database and uploaded files, lives in `/disk/sabha` on the server. Back it up regularly, and copy the backups somewhere off the server, such as S3 or R2.
+Everything Sabha stores lives in `/disk/sabha` on the server: its two SQLite databases (the main one and the job queue) and uploaded files. Back it up regularly, and copy the backups somewhere off the server, such as S3 or R2.
 
-To take a backup, first write any pending database changes into the main file, then archive the folder:
+To take a consistent backup, stop the app for the moment it takes to archive the folder:
 
 ```bash
-kamal app exec 'bin/rails runner "ActiveRecord::Base.connection.execute(%(PRAGMA wal_checkpoint(TRUNCATE)))"'
+kamal app stop
 ssh root@your-server "tar -czf /root/sabha-backup-$(date +%Y%m%d).tar.gz -C /disk/sabha ."
+kamal app boot
 ```
 
 To restore, stop the app, unpack the archive over the folder and start it again:
@@ -232,17 +248,15 @@ ssh root@your-server "du -sh /disk/sabha"
 
 ## sabha.co and the desktop app
 
-Sabha's desktop app, and sabha.co when a member adds your workspace to their list, find your server through `GET /api/manifest`. There's nothing to configure beyond a reachable HTTPS address.
-
-Members can keep your workspace in their sabha.co list, beside their other workspaces. After signing in, the sidebar offers once to add it (members can dismiss it for good), and their profile page keeps a link. sabha.co only reads your workspace's public name, logo and address. It never sees your members' accounts or sessions. To stop suggesting it, turn off **Suggest adding this workspace to sabha.co** in Account settings. Workspaces using their own single sign-on don't show it.
+Sabha's desktop app, and sabha.co for workspaces already in a member's list, find your server through `GET /api/manifest`. There's nothing to configure beyond a reachable HTTPS address.
 
 ### Continue with sabha.co
 
-You can also let members sign in with their sabha.co account. It's one more option beside your own password or email-code sign-in, and it stays off until you connect:
+A workspace can let members sign in with their sabha.co account, as one more option beside your own password or email-code sign-in. A [Sabha Cloud Deploy](https://cloud.sabha.co) server is connected when it's built. sabha.co doesn't add other self-hosted workspaces by address, so the steps below apply only to a workspace that's already in your sabha.co list:
 
 <Steps>
-  <Step title="Add the workspace on sabha.co">
-    On sabha.co, click **+** in the sidebar, choose **Add a self-hosted workspace**, paste your workspace's address and tick **I run this workspace**. sabha.co shows a secret once. If the workspace is already in your list, use **Set up Continue with sabha.co** from its menu in Settings instead.
+  <Step title="Get a secret">
+    On sabha.co, open your account's **Workspaces** page, and choose **Set up Continue with sabha.co** from the workspace's **⋯** menu. sabha.co shows a secret once.
   </Step>
   <Step title="Give your server the secret">
     Add it to `.env` as `SABHA_HUB_SECRET` and run `kamal deploy`.
@@ -254,7 +268,7 @@ You can also let members sign in with their sabha.co account. It's one more opti
 
 Your rules still apply. Someone new still needs your invite link. An existing member is never matched to a sabha.co account by email: they connect it from their own profile after signing in the usual way. sabha.co tells your workspace a member's name and email only after that member approves it once.
 
-To rotate the secret, use **Get a new secret** from the workspace's menu in sabha.co's Settings, deploy with the new secret and click **Verify** straight away; the option stops working in between. To turn it off, use **Disconnect from sabha.co** from the same menu. Members keep your workspace in their list and sign in the usual way. Workspaces using their own [single sign-on](/self-hosting/sso/) can't use this option.
+To rotate the secret, use **Get a new secret** from the same menu, deploy with the new secret and click **Verify** straight away; the option stops working in between. To turn it off, use **Disconnect from sabha.co**. Members keep your workspace in their list and sign in the usual way. Workspaces using their own [single sign-on](/self-hosting/sso/) can't use this option.
 
 ### Desktop notifications
 

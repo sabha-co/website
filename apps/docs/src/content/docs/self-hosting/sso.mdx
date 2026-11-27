@@ -46,11 +46,18 @@ With single sign-on on:
 
 - Password sign-in, email-code sign-in and sign-in links all go through your parent app instead.
 - Password reset is turned off.
-- Apps keep working: their bot keys still authenticate against the API.
+- **Continue with sabha.co** is turned off. Single sign-on through your own app is the only way in.
+- Anyone your parent app signs in gets a Sabha account, with or without an invite.
+- Signing out of Sabha shows a "You're signed out" page with a way to sign in again. It doesn't sign the person out of your parent app.
+- Apps keep working: their keys still authenticate against the API.
+
+### A new install
+
+On a new install with `AUTH_METHOD=sso`, there's no setup form. The first person to come back from your parent app becomes the workspace's administrator. The workspace takes its name from `BOOTSTRAP_WORKSPACE_NAME`, or "Sabha" if that's unset; rename it in Settings afterwards.
 
 ## How the sign-in works
 
-When someone who isn't signed in visits Sabha, Sabha sends their browser to:
+When someone who isn't signed in visits Sabha, Sabha sends their browser to your parent app. Any query string already in `SSO_PROVIDER_URL` is kept:
 
 ```text
 SSO_PROVIDER_URL?sso=<base64-payload>&sig=<hmac-signature>
@@ -65,11 +72,11 @@ The payload contains:
 
 Your parent app must:
 
-1. Verify `sig`: an HMAC-SHA256 of the exact `sso` parameter, keyed with the shared secret.
+1. Verify `sig`: the HMAC-SHA256 of the exact `sso` parameter, keyed with the shared secret, as lowercase hex.
 2. Decode the base64 payload.
 3. Sign the person in.
 4. Build a response payload with at least `nonce`, `external_id` and `email`.
-5. Base64-encode the response payload.
+5. Base64-encode the response payload with standard base64 and no line breaks, such as Ruby's `Base64.strict_encode64`. URL-safe base64 is refused.
 6. Sign the encoded payload the same way.
 7. Redirect to `return_sso_url?sso=<response-payload>&sig=<response-signature>`.
 
@@ -78,20 +85,20 @@ Your parent app must:
 | Field | Description |
 | --- | --- |
 | `nonce` | The nonce from Sabha's request. |
-| `external_id` | The person's id in your parent app. It must never change. Sabha ignores its case. |
+| `external_id` | The person's id in your parent app. It must never change. Sabha ignores its case, and refuses `none`, `nil`, `null` and `blank`. |
 | `email` | The person's email address. |
 
 ### Optional response fields
 
 | Field | Description |
 | --- | --- |
-| `name` | Used when creating the account. Updates existing accounts when `SSO_OVERRIDES_NAME=true`. |
+| `name` | Used when creating the account; without one, Sabha uses the first part of the email address. Updates existing accounts when `SSO_OVERRIDES_NAME=true`. |
 | `avatar_url` | Used when creating the account. Updates existing accounts when `SSO_OVERRIDES_AVATAR=true`. |
-| `require_activation` | Send `true` if your app hasn't verified the email. Sabha sends its own verification email and doesn't open a session until it's confirmed. |
+| `require_activation` | Send `true` if your app hasn't verified the email. A new account gets Sabha's own verification email and can't sign in until it's confirmed. An existing Sabha account is never matched by email while this is `true`. See [How people are matched](#how-people-are-matched-to-accounts). |
 | `failed` | Send `true` to refuse the sign-in. |
 | `logout` | Send `true`, with a valid nonce, to end the person's Sabha session. |
 
-Sabha ignores roles, groups, admin flags, usernames, two-factor fields and custom fields.
+Boolean fields count only as the text `true` or `false`. Sabha ignores roles, groups, admin flags, usernames, two-factor fields and custom fields.
 
 ## Example provider
 
@@ -149,11 +156,13 @@ Use the same value for `SABHA_SSO_SECRET` in your parent app and `SSO_SECRET` in
 
 When someone signs in, Sabha looks for their account in this order:
 
-1. An account already linked to their `external_id`.
-2. An active account with the same email, as long as `require_activation` isn't `true` and that account isn't linked to another `external_id`.
-3. Otherwise, a new account.
+1. **An account already linked to their `external_id`.** They're signed in, unless the account has been deactivated.
+2. **An active account with the same email.** Sabha links it to the `external_id` and signs them in. It refuses instead if `require_activation` is `true`, or if that account is already linked to a different `external_id`.
+3. **Otherwise, a new account.**
 
 So an existing workspace can switch to single sign-on without anyone recreating their account.
+
+Links belong to your parent app's address: the scheme, host and port of `SSO_PROVIDER_URL`. If that address changes, existing links stop applying, and people are matched by email again on their next sign-in.
 
 <Aside type="danger" title="Email matching trusts your parent app">
   If your parent app lets someone use `alice@example.com` without proving they own it, that person could take over Alice's existing Sabha account. To prevent it:
@@ -185,7 +194,7 @@ Invite links keep working with single sign-on. When someone opens an invite link
 2. Deploy, so Sabha restarts.
 3. Check that signing in works.
 
-The links between accounts and `external_id`s stay in the database. They're harmless while single sign-on is off, and they're used again if you turn it back on.
+The links between accounts and `external_id`s stay in the database. They're harmless while single sign-on is off, and they're used again if you turn it back on with the same `SSO_PROVIDER_URL` address.
 
 People whose accounts were created through single sign-on may never have had a Sabha password. If you switch back to passwords, they can set one with password reset.
 
@@ -207,17 +216,23 @@ Common causes:
 - The provider signed the decoded payload instead of the exact base64 `sso` value.
 - The provider used a different secret.
 - The provider changed whitespace or encoding before signing.
-- The nonce expired.
+- The payload is URL-safe base64 (with `-` or `_`), or has line breaks in it.
+- The `external_id` is `none`, `nil`, `null` or `blank`.
+- The nonce expired. It lasts 30 minutes.
 - The callback opened in a different browser session from the one that started the sign-in.
 - The same callback URL was used again after a successful sign-in.
 
-### Someone gets a verification email instead of a session
+### "Please verify your email address before signing in"
 
-Your provider sent `require_activation=true`. Sabha sent its own verification email and opens a session once they confirm their address.
+Your provider sent `require_activation=true`.
+
+- **For a new account**, Sabha sent its own verification email. Once they confirm, Sabha sends them through your parent app again to sign in.
+- **For an existing account with the same email**, Sabha refuses and sends nothing. Verify the address in your parent app and send `require_activation=false`.
 
 ### An existing member can't sign in
 
-Check whether their email is already linked to a different `external_id`. Sabha refuses ambiguous matches so no one can take over another person's account.
+- **"This account is already linked to a different sign-in"**: their email belongs to an account linked to another `external_id`. Sabha refuses so no one can take over another person's account. Send the `external_id` the account was first linked with.
+- **"Single sign-on failed"**: their account may have been deactivated. [Reactivate](/workspace/members/#deactivate-and-reactivate) it.
 
 ### An invite link fails after signing in
 

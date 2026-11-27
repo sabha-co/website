@@ -10,7 +10,7 @@ Sabha installs straight from your browser, like a regular app, on phones, tablet
 
 ## Install Sabha
 
-Open your workspace in your browser and look for Sabha's install prompt. It shows the steps for your browser and device. You can also use your browser's own install option, such as **Install app** in Chrome or Edge.
+In most browsers, **Install Sabha as a web app** at the top of your profile settings shows the steps for your browser and device, with an **Install now** button where the browser allows it. In Chrome and desktop Firefox, use the browser's own install option, such as **Install app** in Chrome's menu.
 
 ### iPhone and iPad
 
@@ -25,7 +25,7 @@ If you try to turn on notifications in Safari first, Sabha shows you these steps
 
 ## Turn on push notifications
 
-When you turn notifications on, your browser asks for permission. Allow it, and Sabha starts sending pushes to that device. You can turn push off for all your devices with **Push notifications** in your notification preferences.
+In your notification preferences, under **This browser**, click **Turn on**. Your browser asks for permission: allow it, and Sabha starts sending pushes to that device. You can turn push off for all your devices with **Push notifications** in the same preferences.
 
 What you're notified about depends on each channel's notification level. See [Notifications](/features/notifications/).
 
@@ -33,19 +33,19 @@ What you're notified about depends on each channel's notification level. See [No
 
 - **Direct messages** show the sender's name and their message.
 - **Channels** show the channel's name, then the sender's name and message.
-- **Thread replies** link back to the message the thread started from.
+- **Thread replies** show 🧵 and the channel's name, and open the thread.
 
-Clicking a notification opens the conversation, in a Sabha window that's already open if you have one.
+Messages are cut to 200 characters. Clicking a notification opens the conversation: a channel at your first unread message, a forum with the post open at the reply. It opens in the Sabha window you're using if one has focus, or in a new one.
 
 You won't get a push for a channel you're looking at right now.
 
 ## Badge
 
-The installed app's icon shows how many channels have unread messages, where your device supports app badges.
+The installed app's icon shows how many conversations need you: channels with an unread @mention, and direct messages with anything unread. It shows where your device supports app badges.
 
 ## Offline
 
-If your connection drops, the installed app shows an offline page instead of a browser error, and picks up again when you're back online.
+Once you've turned notifications on, Sabha shows its own offline page instead of a browser error if your connection drops. Click **Retry now** when you're back online.
 
 ## For administrators: setting up push
 
@@ -55,7 +55,7 @@ Push notifications need a VAPID key pair, which lets your server prove its ident
 npx web-push generate-vapid-keys
 ```
 
-Set the two keys as `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` and deploy. See [Deploy Sabha](/self-hosting/deploy/#configuration). Sabha gives `SUPPORT_EMAIL` to the push services as your contact address.
+Set the two keys as `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` and deploy. See [Deploy Sabha](/self-hosting/deploy/#configuration). Sabha gives the push services your sending address, `MAILER_FROM_EMAIL`, as its contact.
 
 <Aside type="caution" title="Keep the keys stable">
   Each device's subscription is tied to your public key. If you change the keys, everyone needs to turn push notifications on again.
@@ -63,4 +63,4 @@ Set the two keys as `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` and deploy. See [
 
 To skip pushes for a channel someone is already looking at, Sabha asks its WebSocket server, AnyCable, who's online. This needs AnyCable-Go 1.6.9 or newer. If Sabha can't reach AnyCable, it falls back to a rougher check, and someone who was online in the last few minutes may miss a push.
 
-The installed app takes its name, short name, description and colors from your [branding settings](/self-hosting/branding/).
+The installed app takes its name from the workspace's name, its theme color from the accent, and its icon from the logo. See [Name, logo and email](/workspace/identity/).
