@@ -1,0 +1,102 @@
+---
+title: Import from Slack
+description: Bring a Slack workspace's channels, people, threads and reactions into Sabha, the way your team remembers them.
+sidebar:
+  order: 5
+  badge: Beta
+---
+
+A self-hosted Sabha can bring in a Slack workspace's history: its channels, people, threads, reactions and formatting. It runs from the browser, shows you what it will do before anything is written, and notifies no one. Workspaces on sabha.co can't import from Slack yet.
+
+## What you need
+
+A Slack export ZIP. A workspace owner or admin makes one in Slack under **Settings & administration → Workspace settings → Import/Export Data**: click **Export** and wait for the download link.
+
+<Aside type="note" title="What your Slack plan exports">
+  Free and Pro workspaces export public channels only. Business+ and Enterprise exports also include private channels and direct messages.
+</Aside>
+
+## Run the import
+
+<Steps>
+  <Step title="Open the importer">
+    As an administrator, go to `/importer` on your workspace, such as `https://chat.example.com/importer`. It isn't in the navigation.
+  </Step>
+  <Step title="Upload the export">
+    Click **Choose zip…** and pick the export. A ZIP that was unzipped and compressed again, as a Mac's **Compress** does, works too.
+  </Step>
+  <Step title="Read the review">
+    Sabha reads the export and shows what an import would bring in, with nothing written yet. It warns you about anything it would leave out entirely, and about channels whose names you already use: those come in beside your existing channel, not into it.
+  </Step>
+  <Step title="Start the import">
+    Click **Start import**. The page follows progress channel by channel. You can close it and come back; a reload or a restart picks up where the import is.
+  </Step>
+</Steps>
+
+When it's done, the page shows what came in and lists the apps and webhooks the Slack workspace had, to set up again. Something that posted into Slack, such as CI, can post to Sabha through an [incoming webhook](/apps/incoming-webhooks/). The ZIP is deleted once the import completes.
+
+Importing into a workspace people are using is safe. History comes in without notifications, pushes or unread badges, a day at a time, so Sabha stays responsive.
+
+## What comes across
+
+| In Slack | In Sabha |
+|---|---|
+| Public channel | Open channel, with its name, and its purpose or topic as its description |
+| Private channel | Closed channel |
+| Direct message, group DM | Direct message between the same people, reused if it already exists |
+| Archived channel | Archived channel |
+| Channel members | Channel members, starting with nothing unread. The administrator running the import joins every public channel too. |
+| Thread | Thread, followed by its starter and everyone who replied |
+| Formatting | Paragraphs, line breaks, lists, code blocks, quotes, bold, italic, strikethrough, code and links |
+| `@person`, `#channel` | Real mentions and channel links. A channel that wasn't imported stays as `#name` text. |
+| `@here`, `@channel`, user groups | Text. Imported history never notifies anyone. |
+| Emoji and reactions | The emoji itself, with skin tones. Custom emoji stay as `:name:`. |
+| Bot messages with attachments, buttons or menus | Their text |
+| Channel renames and archiving | Channel events, dated when they happened |
+| Pins | The most recently pinned message. Sabha pins one message per channel. |
+| Profile pictures | Downloaded in the background afterwards |
+
+### Left out
+
+The review and the summary count what's left out:
+
+- Joins, leaves, topic and purpose changes, and other housekeeping.
+- Files. Each leaves a "(file: name)" note where it was.
+- Canvases, lists and huddle transcripts.
+
+## People
+
+Everyone who posted, reacted, was mentioned or was in a channel comes across as a person. If someone is already in Sabha with the email address Slack had for them, their existing account is used. Otherwise they get a new account with no password, which joins the channels every new member joins.
+
+| In Slack | In Sabha |
+|---|---|
+| A person | An account they can claim |
+| A deleted person | A deactivated account with their real name |
+| A bot or Slackbot | A deactivated bot, with no key or webhook |
+| An author the export doesn't name | One deactivated "Former Slack member" |
+
+### Claiming an account
+
+Imported people sign in the usual way, with the email address Slack had for them. On a workspace that uses passwords, they click **Forgot your password?**; on one that uses email codes, they ask for a code. Using the email proves the address is theirs.
+
+Deactivated people can't come back through an invite link. [Reactivate](/workspace/members/#deactivate-and-reactivate) them if they should.
+
+## Running it again
+
+You can import the same export again, or a newer export of the same Slack workspace. Only what's new comes in, and new messages show as unread to the channel's members. One import runs at a time.
+
+If an import stops partway, start it again from the same page.
+
+<Aside type="caution" title="History from the old importer">
+  Sabha's earlier command-line importer kept its history differently, so this one doesn't recognise it. Importing the same Slack workspace again would bring its channels and messages in a second time. The review warns you when your workspace has history from the old importer: delete those channels first, or import a different workspace.
+</Aside>
+
+## Check an export from the command line
+
+To check an export without the browser, run this on your server. It writes nothing:
+
+```bash
+kamal app exec 'bin/rails "slack:validate[/rails/storage/slack_export.zip]"'
+```
+
+It takes the ZIP or the folder it unzips to, prints the same report the review shows, and exits with an error when a message would be left out entirely.

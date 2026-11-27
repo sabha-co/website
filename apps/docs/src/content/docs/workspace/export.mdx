@@ -1,0 +1,53 @@
+---
+title: Export, move or delete
+description: Take a sabha.co workspace to a server of your own, download it, delete it, or leave it.
+sidebar:
+  order: 6
+---
+
+A workspace on sabha.co can leave whenever you like, with everything in it. **Settings → About** shows where it runs and how much of its storage it's using. Administrators find **Export**, the move and **Delete workspace** there too.
+
+sabha.co runs on shared infrastructure, without guaranteed backups or uptime. A team that needs those can move the workspace to a server of its own.
+
+## Move to a server of your own
+
+[Sabha Cloud Deploy](https://cloud.sabha.co) runs a Sabha server for you, with backups, updates and your own domain. In **Settings → About**, under **Give your workspace a server of its own**, click **Move** to move it there:
+
+- Everything moves: channels, messages, files and apps.
+- Everyone keeps signing in with sabha.co, and old links forward to the new server.
+- The workspace is offline for a few minutes at the end, while the last of it copies.
+- Once it has moved, it's deleted from sabha.co.
+
+If a move doesn't finish, the workspace stays open on sabha.co as usual and nothing is lost. The About page says what went wrong.
+
+Moving is done from a computer, not a phone.
+
+## Export
+
+**Export** packs up the workspace, with its chat and files, and emails a download link to the administrator who asked. The link works for 24 hours after the email is sent.
+
+### Load an export onto your own server
+
+An export loads into a new self-hosted Sabha, before anyone has set it up. [Deploy Sabha](/self-hosting/deploy/), copy the archive into its storage folder, and load it:
+
+```bash
+scp workspace.tar.gz root@your-server:/disk/sabha/
+kamal app exec 'bin/rails workspace:import ARCHIVE=/rails/storage/workspace.tar.gz'
+```
+
+It takes the archive or the folder it unpacks to. Sabha refuses an archive when:
+
+- The server already has a workspace.
+- The archive is from a newer version of Sabha. Update the server first.
+
+Members can keep signing in with sabha.co once the server is linked to it, or sign in with their email.
+
+## Delete the workspace
+
+**Delete workspace** removes everything in it, for everyone. Type the workspace's name to confirm. It can't be undone, so export first if you might want any of it.
+
+## Leave a workspace
+
+Anyone can leave a workspace on sabha.co from **Settings → About**. Their messages stay, and they need a new invite to come back.
+
+The last administrator can't leave. Make someone else an administrator first, in [Manage members](/workspace/members/#roles).

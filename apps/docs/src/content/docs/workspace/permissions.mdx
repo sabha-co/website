@@ -1,8 +1,8 @@
 ---
 title: Roles and permissions
-description: Who can create, change and remove rooms, messages and people in a Sabha workspace.
+description: Who can create, change and remove channels, messages and people in a Sabha workspace.
 sidebar:
-  order: 31
+  order: 4
 ---
 
 ## Roles
@@ -13,14 +13,14 @@ Everyone in a workspace has one of four roles.
 |------|-------------|
 | **Member** | Everyone, by default. |
 | **Moderator** | Staff who keep conversations healthy. They can edit and delete anyone's messages, and see banned and deactivated people. |
-| **Administrator** | Full control over the workspace: its settings, people, rooms and apps. |
+| **Administrator** | Full control over the workspace: its settings, people, channels and apps. |
 | **Bot** | How an app appears in chat. Only apps have this role. |
 
-Administrators change people's roles from **Manage members**. The Bot role can't be given to a person there.
+Administrators change people's roles in **Settings → Members**. See [Manage members](/workspace/members/#roles). The Bot role can't be given to a person.
 
-## Rooms
+## Channels
 
-| Room type | What it is |
+| Channel type | What it is |
 |------|-------------|
 | **Open** | Any member can find and join it. |
 | **Closed** | Invite-only. |
@@ -28,33 +28,33 @@ Administrators change people's roles from **Manage members**. The Bot role can't
 | **Forum** | A gallery of titled posts. See [Forums](/features/forums/). |
 | **Thread** | A side conversation that starts from one message. |
 
-### Who can do what with rooms
+### Who can do what with channels
 
-| Room type | Create | Read | Change | Delete |
+| Channel type | Create | Read | Change | Delete |
 |-----------|--------|------|--------|--------|
 | **Open** | Anyone¹ | Members | Its creator or an administrator | Its creator or an administrator |
 | **Closed** | Anyone¹ | Members | Its creator or an administrator | Its creator or an administrator |
 | **Forum** | Anyone¹ | Members | Its creator or an administrator | Its creator or an administrator |
 | **Direct message** | Anyone² | The people in it | Not applicable | Anyone in it |
-| **Thread** | Any member of the room it starts from³ | Members of that room | Its creator or an administrator | Its creator or an administrator |
+| **Thread** | Any member of the channel it starts from³ | Members of that channel | Its creator or an administrator | Its creator or an administrator |
 
-1. Unless the workspace limits room creation to administrators. See [Workspace settings](#workspace-settings).
+1. Unless the workspace limits channel creation to administrators. See [Workspace permissions](#workspace-permissions).
 2. Unless the workspace limits new direct messages to administrators.
-3. Threads start from a message in an open or closed room. Direct messages, threads and forum posts can't have threads of their own.
+3. Threads start from a message in an open or closed channel. Direct messages, threads and forum posts can't have threads of their own.
 
 In a forum, any member can start a post. Only the post's author or an administrator can edit its title or mark it solved. Anyone who can see a post can copy its link.
 
-Open rooms set to auto-join include everyone already in the workspace and everyone who joins later. The workspace's first room can't be deleted.
+Open channels set to auto-join include everyone already in the workspace and everyone who joins later. The workspace's first channel can't be deleted.
 
-### Leaving a room
+### Leaving a channel
 
-Leaving a room hides it from your sidebar. Your past messages stay where they were. The last person in a closed room can't leave it; delete the room instead.
+Leaving a channel hides it from your sidebar. Your past messages stay where they were. The last person in a closed channel can't leave it; delete the channel instead.
 
 ## Messages
 
 | Action | Who can do it |
 |--------|----------------|
-| Post | Any active member of the room |
+| Post | Any active member of the channel |
 | Edit your own | You |
 | Delete your own | You |
 | Edit someone else's | Moderators and administrators |
@@ -62,7 +62,7 @@ Leaving a room hides it from your sidebar. Your past messages stay where they we
 
 ## Managing people
 
-Only administrators can change roles, deactivate, ban, unban and reactivate people. Moderators can see the lists of banned and deactivated people, but can't change them.
+Only administrators can change roles, deactivate, ban, unban and reactivate people. Moderators can see the lists of banned and deactivated people, but can't change them. See [Manage members](/workspace/members/).
 
 ### Blocks and bans
 
@@ -71,21 +71,21 @@ Sabha has two ways to stop unwanted contact.
 - **Blocking** is between two people. If either of them blocks the other, neither can start a direct message with or @mention the other. Anyone can block someone, and undo it, from their own settings. No administrator is involved.
 - **Banning** is an administrator action for the whole workspace. It signs the person out everywhere, removes their messages, and refuses further requests from the addresses they used. The person gets an email when they're banned, and again if they're unbanned.
 
-## Workspace settings
+## Workspace permissions
 
-Administrators can tighten permissions in **Account settings**:
+**Settings → Permissions** sets what members can do without asking an administrator. All three are on by default.
 
-| Setting | Effect |
+| Setting | When it's off |
 |---------|--------|
-| **Must be admin to create new rooms** | Only administrators can create rooms. Members can still join and post in existing ones. |
-| **Must be admin to start DMs** | Only administrators can start new direct messages. Existing ones keep working. |
-| **Allow everyone to create invite links** | On by default. Turn it off and only administrators can create invite links; the links members already made stop working. |
+| **Create channels** | Only administrators create channels. Members still join and post in existing ones. |
+| **Start direct messages** | Only administrators start new direct messages. Existing ones keep working. |
+| **Create invite links** | Only administrators share the join link, and the links members already made stop working at once. See [Invite people](/workspace/invitations/). |
 
-These settings apply to apps too. Which rooms an app's bot can hear from is set separately, on the bot's page in settings, by administrators only.
+These settings apply to apps too. Which channels an app is in is set separately, on the app's page in settings, by administrators only. See [Add an app](/apps/add-an-app/).
 
 ## Notification levels
 
-Each person chooses how closely they follow each room, with the bell button:
+Each person chooses how closely they follow each channel, with the bell button:
 
 | Level | What you get |
 |-------|----------|

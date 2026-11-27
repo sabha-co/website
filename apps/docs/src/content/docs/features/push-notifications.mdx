@@ -27,21 +27,21 @@ If you try to turn on notifications in Safari first, Sabha shows you these steps
 
 When you turn notifications on, your browser asks for permission. Allow it, and Sabha starts sending pushes to that device. You can turn push off for all your devices with **Push notifications** in your notification preferences.
 
-What you're notified about depends on each room's notification level. See [Notifications](/features/notifications/).
+What you're notified about depends on each channel's notification level. See [Notifications](/features/notifications/).
 
 ## What a notification looks like
 
 - **Direct messages** show the sender's name and their message.
-- **Rooms** show the room's name, then the sender's name and message.
+- **Channels** show the channel's name, then the sender's name and message.
 - **Thread replies** link back to the message the thread started from.
 
 Clicking a notification opens the conversation, in a Sabha window that's already open if you have one.
 
-You won't get a push for a room you're looking at right now.
+You won't get a push for a channel you're looking at right now.
 
 ## Badge
 
-The installed app's icon shows how many rooms have unread messages, where your device supports app badges.
+The installed app's icon shows how many channels have unread messages, where your device supports app badges.
 
 ## Offline
 
@@ -61,6 +61,6 @@ Set the two keys as `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` and deploy. See [
   Each device's subscription is tied to your public key. If you change the keys, everyone needs to turn push notifications on again.
 </Aside>
 
-To skip pushes for a room someone is already looking at, Sabha asks its WebSocket server, AnyCable, who's online. This needs AnyCable-Go 1.6.9 or newer. If Sabha can't reach AnyCable, it falls back to a rougher check, and someone who was online in the last few minutes may miss a push.
+To skip pushes for a channel someone is already looking at, Sabha asks its WebSocket server, AnyCable, who's online. This needs AnyCable-Go 1.6.9 or newer. If Sabha can't reach AnyCable, it falls back to a rougher check, and someone who was online in the last few minutes may miss a push.
 
 The installed app takes its name, short name, description and colors from your [branding settings](/self-hosting/branding/).
