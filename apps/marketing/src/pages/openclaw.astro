@@ -3,30 +3,33 @@ import Prose from "../layouts/Prose.astro";
 import FeatureVideo from "../components/FeatureVideo.astro";
 ---
 
-<Prose title="OpenClaw on Sabha — Open Source AI Assistant for Communities" description="Run an AI assistant — OpenAI, Anthropic, or local LLMs — inside Sabha rooms and DMs. Open source, self-hosted, no webhook URL needed." label="INTEGRATION" heading="OpenClaw on Sabha">
+<Prose title="OpenClaw on Sabha: bring your OpenClaw bot to your team's chat" description="Bring the OpenClaw bot you already run into Sabha, the agent-native, open-source alternative to Slack. It connects over a WebSocket, so it needs no public address." label="INTEGRATION" heading="OpenClaw on Sabha">
   <img slot="mark" src="/_site/logos/openclaw-claw.svg" alt="OpenClaw" width="56" height="56" />
-  <FeatureVideo slot="figure" name="bot" width={1280} height={720} label="An OpenClaw AI agent in a Sabha room" />
-  <p>Sabha provides first-class <a href="https://openclaw.ai" target="_blank" rel="noopener" class="landing-link">OpenClaw</a> support over WebSockets. The AI bot connects outbound to your workspace — no webhook URL to configure, no public IP to expose, no tunnels. OpenClaw works with self-hosted Sabha, multi-tenant SaaS mode on sabha.co, and dedicated instances managed by Sabha Cloud Deploy.</p>
+  <FeatureVideo slot="figure" name="bot" width={1280} height={720} label="An OpenClaw bot replying in a Sabha channel" />
+  <p>Already running an <a href="https://openclaw.ai" target="_blank" rel="noopener" class="landing-link">OpenClaw</a> bot? Bring it into Sabha. It joins your workspace as a bot with its own name, key and permissions, in the channels you choose. People mention it, reply in its threads and react to it like any teammate.</p>
 
-  <p>@mention it in any room, or DM it directly, and it replies — powered by the LLM of your choice (OpenAI, Anthropic, or a local model).</p>
+  <p>The bot connects out to Sabha over a WebSocket, so it needs no public address, webhook URL or tunnel. It can run on a laptop or on any server. It keeps your OpenClaw setup, skills and model keys, and Sabha never sees them. It works the same on sabha.co, on Sabha Cloud Deploy and on your own server.</p>
 
-  <p>No third-party chat dependency, no third-party AI dependency. OpenClaw runs on Discord, Telegram, Slack, and a dozen other channels — but with Sabha you can self-host the entire stack. Your community, your bot, your data, your servers.</p>
-
-  <h3>How it works</h3>
+  <h3>Connect it</h3>
 
   <ol>
-    <li>Add Sabha to OpenClaw: <code>openclaw plugins install @sabha-co/openclaw-sabha</code></li>
-    <li>Run <code>openclaw configure --section channels</code> and paste a Sabha join URL.</li>
-    <li>@mention the bot in any room, or DM it directly. It's that quiet.</li>
+    <li>In <strong>Settings → Apps</strong>, add an app for the bot and put it in the channels it should answer in.</li>
+    <li>On the app's <strong>API</strong> tab, choose <strong>OpenClaw</strong> under <strong>Set up with</strong>. The steps fill in your workspace's address and the bot's key.</li>
+    <li>Paste them on the machine where OpenClaw runs. They install <code>@sabha-co/openclaw-sabha</code>, connect it, and restart the gateway. The <strong>API</strong> tab shows when the bot is online.</li>
   </ol>
 
-  <h3>What the AI can do</h3>
+  <h3>What it can do</h3>
 
-  <p>Rooms, threads, DMs, reactions, attachments, search — the AI speaks Sabha natively. Give it MCP tools, RAG over your community's docs, vision on uploaded images, voice — anything OpenClaw skills support. In rooms it only replies when @mentioned, so it stays out of the way. In DMs it's always listening.</p>
+  <p>It answers when mentioned, replying in a thread, and keeps talking in any thread it's part of without another mention. It reads and sends files, reacts, edits its own messages, searches history and looks people up. Let people message it, and it answers direct messages too. An administrator decides what each bot's key may do.</p>
+
+  <h3>Beside Sabha's agent</h3>
+
+  <p>Sabha also has an agent built in, which answers from your company brain. Your OpenClaw bot works beside it, doing whatever you built it for.</p>
 
   <h3>Get started</h3>
 
   <ul class="landing-links">
+    <li><a href="/docs/apps/ai-agents/" class="landing-link">Bring an AI bot, in the docs</a></li>
     <li><a href="https://github.com/sabha-co/openclaw-sabha" target="_blank" rel="noopener" class="landing-link">openclaw-sabha on GitHub</a></li>
     <li><a href="https://openclaw.ai" target="_blank" rel="noopener" class="landing-link">OpenClaw homepage</a></li>
   </ul>
