@@ -1,0 +1,76 @@
+---
+title: Add an app
+description: Create an app, give it a key, choose its channels and decide what it may do.
+sidebar:
+  order: 1
+---
+
+Only administrators can add apps. There's no self-service sign-up: an app exists once an administrator creates it, and it can do only what they allow.
+
+## Create the app
+
+<Steps>
+  <Step title="Name it">
+    In **Settings → Apps**, click **Add app**, give it a name and click **Create app**. The name is what people see on its messages and in the sidebar.
+  </Step>
+  <Step title="Copy the key">
+    The app's page opens on its **API** tab, with the key showing. This is the only time it's shown: Sabha keeps only a hash of it. Copy it now, or follow the setup steps on that tab, which have the key filled in.
+  </Step>
+  <Step title="Put it in channels">
+    On the **Access** tab, pick the channels the app may post in. Adding or removing an app posts a line in the channel so everyone can see it.
+  </Step>
+  <Step title="Connect the app">
+    Give the app the three settings from the **API** tab, below. The tab shows whether the app has connected.
+  </Step>
+</Steps>
+
+## The API tab
+
+The **API** tab holds what the app's code needs:
+
+| Setting | What it is |
+|---|---|
+| API base URL | `https://chat.example.com/api/v1`. On sabha.co it includes your workspace's path. |
+| WebSocket URL | `wss://chat.example.com/cable`. On sabha.co it ends in `?wid=…`, naming your workspace. It holds no key, so use it exactly as shown. |
+| Key | `sabha_app_…`, sent as `Authorization: Bearer …` on every call. |
+
+**Set up with** switches the steps between **Your own code**, which prints the three settings as environment variables, and the known apps, such as OpenClaw and Hermes, which print the commands to install and connect them. **Ask your agent** turns the same steps into a prompt you can paste into a coding agent.
+
+To get a new key, click **Rotate** beside the key, or **Fill in a new key…** under the setup steps to get the steps with the new key in them. The old key stops working at once, so update the app straight after.
+
+## Permissions
+
+The **Access** tab has a switch for each thing the key may do. A change applies from the key's next call; the key itself stays the same.
+
+| Permission | On for a new app | Lets the app |
+|---|---|---|
+| Post and react | Yes | Post, edit and delete its own messages, react, send private replies, show drafts and statuses, and answer commands and clicks |
+| Read messages in its channels | Yes | Read history, messages, reactions and search, and hear every message in its channels |
+| See people and channels | Yes | List users, channel members and its channels, and hear when people join or leave the workspace. Each person is only an id, a name and a role. |
+| Start direct messages | No | Open a DM with anyone in the workspace. Replying in a DM someone else started needs only **Post and react**. |
+| Create and join channels | No | Create channels, join open ones, and rename, archive and change the members of channels it created |
+
+Without **Read messages in its channels**, an app hears only what's said to it: messages that mention it, new messages in its DMs, and its own commands and clicks. With **See people and channels** but not **Read messages in its channels**, it can look people up to mention them without reading anything they've said.
+
+Whatever is switched on, an app can't administer the workspace, use `@everyone`, or read a channel it isn't in.
+
+## Events
+
+The **Events** tab is where you set the app's **outbound webhook**, if it takes events by webhook rather than WebSocket. Once a URL is saved, the tab shows the **signing secret** the app uses to [check each delivery](/apps/events/#verify-every-delivery). Unlike the key, you can come back and read the secret again.
+
+The tab also shows the last delivery: when the app last accepted one, or why the last one failed. If five events in a row fail every retry, Sabha suspends the webhook, sends the app's owner a direct message, and marks the tab **Suspended**. Resume it there, or save a new URL. A suspended app keeps its channels, its WebSocket events and its API access.
+
+Webhook URLs must be on the public internet. Addresses on private and internal networks are refused.
+
+## Commands and incoming webhooks
+
+- **Commands** lists the [slash commands](/apps/commands/) the app has declared, each with a switch. A command you switch off stays off, even when the app declares its commands again.
+- **Incoming webhooks** makes [write-only URLs](/apps/incoming-webhooks/) that post into one channel. Each URL is shown once.
+
+## Name and icon
+
+Click **Edit** at the top of the app's page to rename it or upload an icon. An icon you upload is shown instead of the one the app sets for itself. Remove yours and the app's own comes back.
+
+## Remove an app
+
+**Remove app**, at the bottom of the **Access** tab, stops its key at once. Anything using it starts failing. Messages it already posted stay in their channels.

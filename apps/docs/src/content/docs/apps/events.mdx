@@ -1,0 +1,196 @@
+---
+title: Receive events
+description: Hear about messages, reactions, clicks and commands over a WebSocket or a signed webhook.
+sidebar:
+  order: 3
+---
+
+An event is Sabha telling an app that something happened: a message posted, a reaction added, a button clicked. Events arrive over a WebSocket the app opens, a webhook Sabha calls, or both. The payloads are the same either way.
+
+## WebSocket
+
+The WebSocket is the simpler choice: the app dials out, so it needs no public address and no signature checks.
+
+1. Open the **WebSocket URL** from the app's **API** tab, with the header `Authorization: Bearer sabha_app_…`. A key in the URL is refused, since URLs end up in proxy logs.
+2. Speak the Action Cable protocol (`actioncable-v1-json`), and subscribe:
+
+   ```json
+   { "command": "subscribe", "identifier": "{\"channel\":\"AppEventsChannel\"}" }
+   ```
+
+3. Events arrive as frames with no `type`, whose `message` is the event. Skip the one `"type": "presence"` frame right after subscribing: it's Sabha marking the app online.
+
+Act on events through the API. The socket itself takes only two things from the app: an [answer to a slash command](/apps/commands/#answer-the-command) and [live draft frames](/apps/drafts/).
+
+While the socket is subscribed, people see the app as online. Reconnect with a growing delay when it closes.
+
+### Missed events
+
+On AnyCable's extended protocol (`actioncable-v1-ext-json`), an app that reconnects can ask for what it missed: subscribe again, then send a `history` command with `"history": { "since": <unix seconds> }`. Sabha keeps the last 100 events for up to 5 minutes, and loses them if the WebSocket server restarts. If the server answers `reject_history`, ask once more with `since` alone, then fall back to reading history.
+
+On the plain protocol nothing is replayed. Either way, for a longer gap, read each channel's messages with `after` set to the last one you saw. See [Read history](/apps/messages/#read-history).
+
+## Webhook
+
+Set a URL on the app's **Events** tab and Sabha posts each event to it as JSON, with these headers:
+
+```
+Content-Type:      application/json
+X-Sabha-Event:     message_created
+X-Sabha-Delivery:  <uuid, new for every attempt>
+X-Sabha-Timestamp: <unix seconds>
+X-Sabha-Signature: sha256=<hex>
+X-Sabha-Timeout:   300
+```
+
+`X-Sabha-Timeout` is how many seconds Sabha waits for the answer: 300 for a message or reaction it will [post a reply to](#reply-in-the-response), whatever is left of 15 seconds for a slash command, and 30 for anything else. Answer quickly and do slow work afterwards.
+
+### Verify every delivery
+
+Check each delivery before trusting it, using the **signing secret** from the **Events** tab:
+
+1. Read the raw body and `X-Sabha-Timestamp`.
+2. Reject it if the timestamp is more than 300 seconds from now.
+3. Compute `"sha256=" + HMAC_SHA256(signing_secret, "{timestamp}.{raw_body}")`.
+4. Compare it with `X-Sabha-Signature` in constant time.
+5. Answer `401` if anything fails.
+
+<Tabs>
+  <TabItem label="Node">
+    ```js
+    import { createHmac, timingSafeEqual } from "node:crypto";
+
+    export function verifySabhaWebhook(headers, rawBody, secret) {
+      const signature = headers["x-sabha-signature"] ?? "";
+      const timestamp = Number(headers["x-sabha-timestamp"]);
+      if (!signature || Math.abs(Date.now() / 1000 - timestamp) > 300) return false;
+
+      const expected = "sha256=" + createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
+      return expected.length === signature.length && timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+    }
+    ```
+  </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    require "openssl"
+
+    def verify_sabha_webhook(request, secret)
+      signature = request.env["HTTP_X_SABHA_SIGNATURE"].to_s
+      timestamp = request.env["HTTP_X_SABHA_TIMESTAMP"].to_i
+      return false if signature.empty? || (Time.now.to_i - timestamp).abs > 300
+
+      raw = request.body.read
+      request.body.rewind
+      expected = "sha256=" + OpenSSL::HMAC.hexdigest("SHA256", secret, "#{timestamp}.#{raw}")
+      Rack::Utils.secure_compare(expected, signature)
+    end
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    import hashlib, hmac, time
+
+    def verify_sabha_webhook(headers, raw_body: bytes, secret: str) -> bool:
+        signature = headers.get("X-Sabha-Signature", "")
+        timestamp = int(headers.get("X-Sabha-Timestamp", "0"))
+        if not signature or abs(time.time() - timestamp) > 300:
+            return False
+
+        expected = "sha256=" + hmac.new(secret.encode(), f"{timestamp}.".encode() + raw_body, hashlib.sha256).hexdigest()
+        return hmac.compare_digest(expected, signature)
+    ```
+  </TabItem>
+</Tabs>
+
+### Retries
+
+Sabha waits 10 seconds to connect. A delivery that fails is retried up to 10 times, with growing gaps. Each retry has a new `X-Sabha-Delivery` but the same event `id`, so deduplicate on the `id`. After the last retry the event is dropped.
+
+If the endpoint stays down, the app's owner gets a direct message. After five events in a row fail every retry, the webhook is suspended until an administrator resumes it. See [Add an app](/apps/add-an-app/#events).
+
+### Reply in the response
+
+For a message or reaction that reaches the app because it was mentioned, or was in a DM or thread with it, Sabha reads the webhook's response and posts it as the app's reply:
+
+| The app answers | Sabha |
+|---|---|
+| `200` with `text/plain` or `text/html`, up to 100 KB | Posts the body as the reply |
+| `200` with any other content type | Posts the body as a file |
+| `200` with an empty body | Does nothing |
+| Nothing within the timeout | Posts "Failed to respond within 300 seconds" |
+
+So a one-endpoint app needs no API calls at all:
+
+```ruby
+post "/sabha" do
+  halt 401 unless verify_sabha_webhook(request, ENV["SABHA_SIGNING_SECRET"])
+  event = JSON.parse(request.body.read)
+  halt 200 unless event["event"] == "message_created"
+
+  content_type "text/plain"
+  "#{event.dig("user", "name")} said: #{event.dig("message", "body", "plain")}"
+end
+```
+
+Return an empty `200` and use the API when the reply needs a thread, a mention or buttons. Clicks never reply this way.
+
+## Events
+
+| Event | When |
+|---|---|
+| `message_created` | A message is posted |
+| `message_updated` | A message is edited. Each edit is a new event with a new `id`. |
+| `message_deleted` | A message is deleted |
+| `reaction_created`, `reaction_deleted` | An emoji reaction is added or removed. Adds `reaction: { id, body }`. |
+| `block_actions` | Someone used one of the app's [buttons or menus](/apps/cards/#the-click-event) |
+| `command` | Someone ran one of the app's [slash commands](/apps/commands/) |
+| `user_created`, `user_deleted` | Someone joins or leaves the workspace. Has no channel. |
+
+A `message_created` event:
+
+```json
+{
+  "event": "message_created",
+  "id": "0b6c4c7e-5d1e-4f4e-9a52-6a1f1c2d3e4f",
+  "user": { "id": 1, "name": "Alice", "role": "member", "url": "https://chat.example.com/users/1" },
+  "channel": {
+    "id": 5, "name": "General", "type": "Open",
+    "members": 42, "has_app": true,
+    "messages_url": "https://chat.example.com/api/v1/channels/5/messages"
+  },
+  "message": {
+    "id": 10,
+    "body": { "html": "<p>Hey @DeployBot, ship it?</p>", "plain": "Hey @DeployBot, ship it?", "markdown": "Hey @DeployBot, ship it?" },
+    "has_attachment": false,
+    "attachment": null,
+    "mentionees": [{ "id": 99, "name": "DeployBot", "role": "bot" }],
+    "url": "https://chat.example.com/channels/5@10",
+    "created_at": "2026-09-17T12:00:00Z",
+    "updated_at": "2026-09-17T12:00:00Z",
+    "thread": null,
+    "replies": null
+  },
+  "mentions_app": true
+}
+```
+
+- **`id`** is the event's own. It's the same on the WebSocket, the webhook and every retry, so deduplicate on it.
+- **`user.role`** is `member`, `moderator`, `administrator` or `bot`. Check it to tell people from other apps.
+- **`channel.type`** is `Open`, `Closed`, `Direct` or `Thread`. In a thread, `message.thread` is `{ id, parent_message_id, parent_channel_id }`. A message with a thread under it has `message.replies` as `{ channel_id, count }`.
+- **`mentions_app`** is true when the message names this app, not just `@everyone`.
+- **`message.blocks`** and **`message.metadata`** appear when the message has a [card](/apps/cards/) or [metadata](/apps/messages/#attach-metadata).
+- **Attachments** carry a signed URL that lasts an hour. Download it promptly.
+- **Every URL is absolute.** Use `channel.messages_url` rather than building URLs.
+
+## Who hears what
+
+| Where | The app hears |
+|---|---|
+| An open or closed channel it's in | New messages that mention it or `@everyone`; every edit, delete and reaction |
+| A DM or thread it's in | Every message |
+| A thread it isn't in, under a channel it's in | New messages that mention it by name. Replying joins it to the thread. |
+| Anywhere | Clicks on its own controls, runs of its own commands, and people joining or leaving |
+
+Without the **Read messages in its channels** permission, an app hears only what's said to it: mentions, new messages in its DMs, and its own clicks and commands. People joining and leaving need **See people and channels**.
+
+Two rules hold everywhere. An app never hears its own messages. And another app's message reaches yours only when it mentions yours by name, so two apps can't answer each other forever.

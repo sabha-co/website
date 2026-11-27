@@ -1,0 +1,83 @@
+---
+title: Port a Slack app
+description: How Slack's methods, scopes, events and requests map to Sabha's apps API.
+sidebar:
+  order: 11
+---
+
+Sabha copies Slack wherever the idea is the same, so most of a Slack app ports by changing URLs and the signature check. What the app writes is already Slack's: `text` is mrkdwn with `<@id>` mentions, `blocks` are Block Kit, an incoming webhook takes a Slack message, and `response_url` takes `response_type`, `replace_original` and `delete_original`.
+
+## Different on purpose
+
+- **Ids are Sabha's.** Users, channels and messages have numeric ids. A message is addressed by its id, never a timestamp.
+- **Threads are channels.** Reply with `parent_message_id`, and read a thread as the channel it is.
+- **Reactions are emoji**, the character itself, never a `:shortcode:`.
+- **Signing is Sabha's own**: the same idea, with different headers and base string.
+- **Errors are HTTP statuses** with `{ error, code }`, not `{ ok: false, error }` on a `200`.
+- **No modals and no membership events.** Cards answer in place, and the channel's own line shows an app joining.
+
+## Methods
+
+All paths are under `/api/v1`.
+
+| Slack | Sabha | Change |
+|---|---|---|
+| `auth.test` | `GET /me` | URL |
+| `chat.postMessage` | `POST /channels/:id/messages` with `{ text, blocks }` | URL. Mention by Sabha user id, `<@42>`. Send a `client_message_id` so a retry can't post twice. |
+| `chat.postMessage` with `thread_ts` | `POST /channels/:id/messages?parent_message_id=` | Thread by message id |
+| `chat.postMessage` with `metadata` | The same, with `metadata: { event_type, event_payload }` | None |
+| `chat.update`, `chat.delete` | `PATCH`, `DELETE /messages/:id` | Message id, not `ts` |
+| `chat.postEphemeral` | `POST /channels/:id/ephemerals` with `{ user_id, text }` | URL |
+| `chat.getPermalink` | `url` on every message and event | Read the field |
+| `chat.startStream` | `POST /channels/:id/drafts` | Works at the top of a channel too, not only in threads |
+| `chat.appendStream` | `PATCH /drafts/:id` | Send the whole text so far each time, not just the new part |
+| `chat.stopStream` | Post the reply with `client_message_id` set to the draft's id | The reply replaces the draft and notifies once |
+| `assistant.threads.setStatus` | `PUT /channels/:id/status` with `{ status, parent_message_id }` | Works in any channel the app can post in |
+| `reactions.add`, `remove`, `get` | `POST`, `DELETE`, `GET /messages/:id/reactions` | The emoji, not its name |
+| `conversations.info` | `GET /channels/:id` | URL |
+| `conversations.history` | `GET /channels/:id/messages` | URL. `metadata_type` filters by type. |
+| `conversations.replies` | `GET /channels/:thread_id/messages` | The parent's `replies.channel_id` names the thread |
+| `conversations.list`, `create` | `GET`, `POST /channels` | URL |
+| `conversations.join`, `leave` | `POST`, `DELETE /channels/:id/membership` | URL |
+| `conversations.members`, `invite`, `kick` | `/channels/:id/members` | URL |
+| `conversations.open` | `POST /direct_messages` with `{ user_ids }` | URL |
+| `users.info`, `users.list` | `GET /users/:id`, `GET /users` | URL |
+| `users.setPhoto` | `PUT /profile/icon` | URL |
+| `search.messages` | `GET /search` | URL |
+| `files.uploadV2` | A multipart `attachment` on a new message | One request, not three |
+| `users.lookupByEmail` | Not in Sabha | Apps don't see members' email addresses |
+| `views.open` | Not in Sabha | Ask in the channel, or link out |
+
+## Scopes
+
+| Slack scope | Sabha permission |
+|---|---|
+| `chat:write`, `reactions:write`, `commands` | Post and react (`post`) |
+| `channels:history`, `groups:history`, `im:history`, `reactions:read`, `search:read` | Read messages in its channels (`read_messages`) |
+| `channels:read`, `groups:read`, `users:read` | See people and channels (`read_directory`) |
+| `im:write` | Start direct messages (`dm`) |
+| `channels:manage`, `channels:join`, `groups:write` | Create and join channels (`manage_channels`) |
+| `app_mentions:read` | None: an app always hears its mentions |
+
+Slack's `missing_scope` is Sabha's `missing_permission`, with the same `needed`.
+
+## Events
+
+| Slack | Sabha | Change |
+|---|---|---|
+| `message` | `message_created` | Field names: `message.body.plain` for `text` |
+| `app_mention` | `message_created` with `mentions_app: true` | One check |
+| `message_changed`, `message_deleted` | `message_updated`, `message_deleted` | Field names |
+| Threaded `message` | `message_created` in the thread's channel, with `message.thread` | Thread by message id |
+| `reaction_added`, `reaction_removed` | `reaction_created`, `reaction_deleted` | The emoji, not its name |
+| `message_metadata_posted` and the like | The ordinary message events, carrying `message.metadata` | No separate metadata events |
+| `member_joined_channel` | Not in Sabha | |
+
+## Requests Sabha sends
+
+| Slack | Sabha | Change |
+|---|---|---|
+| A slash command, form-encoded | A [`command` event](/apps/commands/#the-command-event), JSON, over the WebSocket or webhook | Parse JSON. No `team_id` or `trigger_id`. |
+| A command's answer within 3 seconds | The webhook's JSON response, or an `answer` on the WebSocket, within 15 seconds | None on the webhook |
+| `block_actions`, form-encoded `payload=` | [`block_actions`](/apps/cards/#the-click-event) as JSON | Parse JSON. `message.id` for `message.ts`. |
+| `X-Slack-Signature: v0=…` over `v0:{ts}:{body}` | `X-Sabha-Signature: sha256=…` over `{ts}.{body}` | Rewrite the check. See [Verify every delivery](/apps/events/#verify-every-delivery). |

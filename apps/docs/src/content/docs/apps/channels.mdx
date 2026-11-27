@@ -1,0 +1,69 @@
+---
+title: Channels, DMs and profile
+description: List and join channels, start direct messages, and set the app's name, icon and webhook.
+sidebar:
+  order: 5
+---
+
+## Channels
+
+```bash
+curl "$API/channels"               -H "Authorization: Bearer $KEY"   # channels the app is in
+curl "$API/channels?joinable=true" -H "Authorization: Bearer $KEY"   # open channels it could join
+curl "$API/channels/5"             -H "Authorization: Bearer $KEY"   # one channel it's in
+curl "$API/channels/5/members"     -H "Authorization: Bearer $KEY"   # who's in it
+```
+
+A channel the app isn't in is `404`, as if it didn't exist. Lists page with `page` and `per_page`, up to 100.
+
+With the **Create and join channels** permission, an app can join open channels and create its own:
+
+```bash
+curl -X POST   "$API/channels/5/membership" -H "Authorization: Bearer $KEY"   # join
+curl -X DELETE "$API/channels/5/membership" -H "Authorization: Bearer $KEY"   # leave
+curl -X POST "$API/channels" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+  -d '{ "name": "Deploys", "type": "open" }'
+```
+
+`type` is `open` or `closed`. Only the app that created a channel can rename it (`PATCH /channels/:id`), archive it (`DELETE /channels/:id`), or add and remove its members (`POST /channels/:id/members` with `{ "user_id" }`, `DELETE /channels/:id/members/:user_id`). If the workspace lets only administrators create channels, apps get `403`.
+
+Leaving a channel needs no permission.
+
+## Direct messages
+
+With the **Start direct messages** permission, an app can open a DM:
+
+```bash
+curl -X POST "$API/direct_messages" -H "Authorization: Bearer $KEY" \
+  -H "Content-Type: application/json" -d '{ "user_ids": [42] }'
+```
+
+Sabha answers `201` for a new DM and `200` for one that already exists, both with the DM's channel id. Post to it like any channel. DMs can't be left. If the workspace lets only administrators send direct messages, apps get `403`.
+
+### Letting people message the app
+
+An app's profile has `direct_messages`, off until the app turns it on. While it's off, the app has no **Message** button on its profile, the new-message picker doesn't offer it, and a DM the app starts is read-only for the people in it. Turn it on for an app that holds conversations:
+
+```bash
+curl -X PATCH "$API/profile" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+  -d '{ "direct_messages": true }'
+```
+
+## Profile
+
+```bash
+curl "$API/me" -H "Authorization: Bearer $KEY"
+```
+
+`/me` checks the key and answers with the app's `id` and `name`, its `permissions`, whether it takes `direct_messages`, and its workspace's `name` and `url`. Check `permissions` at start-up to see what the app may do.
+
+`PATCH /profile` changes any of `name`, `webhook_url` and `direct_messages`.
+
+### Icon
+
+```bash
+curl -X PUT "$API/profile/icon" -H "Authorization: Bearer $KEY" -F "image=@logo.png"
+curl -X DELETE "$API/profile/icon" -H "Authorization: Bearer $KEY"
+```
+
+The icon is what the app wears in messages, the sidebar and Settings. JPEG, PNG, GIF or WebP up to 5 MB, shown as a square up to 512 pixels. If an administrator has uploaded an icon for the app, theirs is shown instead, and the answer's `shown` is `false`. Without either, the app gets a generated pattern. Ten changes an hour.

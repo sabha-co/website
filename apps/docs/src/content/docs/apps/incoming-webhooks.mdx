@@ -1,0 +1,65 @@
+---
+title: Incoming webhooks
+description: Post into a channel from CI, cron, monitoring or any tool that can post to a Slack webhook.
+sidebar:
+  order: 9
+---
+
+An incoming webhook is a URL that posts into one channel. It carries no key and can do nothing but post, so it's safe to paste into a build log or a third-party tool.
+
+It takes a Slack incoming-webhook message, so a tool built for Slack works when you point it here.
+
+## Make one
+
+On the app's **Incoming webhooks** tab, pick one of the app's channels and create a URL. The channel has to be on the app's **Access** tab first. It's shown once; Sabha keeps only a hash of it. If you lose it, remove it and make another.
+
+## Post to it
+
+```bash
+curl -X POST https://chat.example.com/webhooks/<token> -H "Content-Type: application/json" \
+  -d '{ "text": "*Build 812* passed: <https://ci.example.com/812|details>" }'
+```
+
+It reads JSON, or a form field named `payload`:
+
+```bash
+curl -X POST https://chat.example.com/webhooks/<token> --data-urlencode 'payload={"text": "Build 812 passed"}'
+```
+
+- `text` is Slack's mrkdwn.
+- `blocks` are kept as a [card](/apps/cards/) when Sabha supports every block, images included. Buttons that answer a click are dropped, since a webhook can't hear clicks; link buttons stay. Otherwise the blocks are shown as formatted text.
+- Slack's legacy `attachments` are shown as formatted text.
+
+A tool that retries can send an `Idempotency-Key` header. A second post with the same key on the same URL posts nothing new.
+
+### What's ignored
+
+`channel` (it always posts to its own channel), `thread_ts`, `username`, `icon_url`, `icon_emoji` and attachment `color` are ignored, not refused. Mentions never notify: `<@U…|ann>` shows as "@ann", and `<!channel>` and `<!here>` show as text. An update (a body with `ts`) or a reaction posts nothing and still answers `ok`.
+
+### Answers
+
+Like Slack, it answers `200` with the body `ok`, or the error's name as the whole body:
+
+| Status | Body | When |
+|---|---|---|
+| 400 | `invalid_payload` | Not JSON or a `payload` field, or over a limit |
+| 400 | `no_text` | Nothing to show |
+| 404 | `no_service` | The URL is unknown, its app was removed, or the app left the channel |
+| 410 | `channel_is_archived` | The channel is archived |
+| 429 | `rate_limited` | More than 60 posts a minute. Retry after `Retry-After`. |
+| 503 | `workspace_offline` | The workspace is briefly offline. Retry after `Retry-After`. |
+
+Limits: 256 KB, 50 blocks, 20 attachments, 25 fields per attachment, and 40,000 characters once rendered.
+
+## Alertmanager and Grafana
+
+The same URL takes Alertmanager and Grafana notifications as they send them, with nothing to template. Each alert group becomes one [alert card](/apps/messages/#alerts). While the group fires, every notification for it updates that card in place, without notifying anyone. Once it resolves, its next firing starts a new card.
+
+- **Alertmanager:** add a `webhook_configs` receiver with the URL, and `send_resolved: true` so cards turn resolved.
+- **Grafana:** in **Alerting → Contact points**, add a **Webhook** contact point with the URL and method POST.
+
+## Other tools
+
+- **Jenkins**, with the Slack Notification plugin: set **Override URL** to the webhook URL without the token at the end, put the token in the **Integration token** credential, and leave **Is bot user?** unticked.
+- **GitLab**, with the Slack notifications integration: paste the URL and leave the channel fields empty, since the webhook already has its channel.
+- **Anything else** that asks for a Slack webhook URL: paste the URL as it is.

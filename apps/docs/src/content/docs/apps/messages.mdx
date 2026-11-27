@@ -1,0 +1,147 @@
+---
+title: Post and read
+description: Post, mention, thread, react, attach files and metadata, send private replies, and read history.
+sidebar:
+  order: 4
+---
+
+Every example uses the **API base URL** and **key** from the app's **API** tab:
+
+```bash
+API=https://chat.example.com/api/v1
+KEY=sabha_app_…
+CHANNEL=5
+```
+
+## Post a message
+
+```bash
+curl -X POST "$API/channels/$CHANNEL/messages" -H "Authorization: Bearer $KEY" \
+  -H "Content-Type: text/plain" -d "Deploy v2.3 finished"
+```
+
+The body's content type decides what's posted:
+
+| Content type | Posts |
+|---|---|
+| `text/plain` | A paragraph of text |
+| `text/html` | Rich text. Tags outside Sabha's safe list are removed. |
+| `application/json` | `body` (HTML or text) or `text` (Slack's mrkdwn), with optional [`blocks`](/apps/cards/) and [`metadata`](#attach-metadata) |
+| `multipart/form-data` | A file, in a field named `attachment` |
+
+Sabha answers `201` with the new message's id and a `Location` header.
+
+**Send a `client_message_id` with every post**, a UUID you make: a JSON key, a multipart field, or a query parameter with `text/plain`. If a post times out and you send it again with the same id, Sabha answers `200` with the first post and posts nothing new.
+
+An app can post 60 messages a minute. Past that it gets `429` with a `Retry-After` header.
+
+## Mention someone
+
+Write `@{user_id}` in a `body`, or Slack's `<@user_id>` in `text`. A mention only works for people in the channel, or in the channel above for a thread, so look people up with `channel_id`:
+
+```bash
+curl "$API/autocompletable/users?channel_id=$CHANNEL&query=alice" -H "Authorization: Bearer $KEY"
+curl "$API/users?channel_id=$CHANNEL&page=1&per_page=50" -H "Authorization: Bearer $KEY"
+curl "$API/users/42" -H "Authorization: Bearer $KEY"
+```
+
+Autocomplete returns up to 20 people, exact name matches first. Apps can't mention `@everyone`.
+
+## Reply in a thread
+
+```bash
+curl -X POST "$API/channels/$CHANNEL/messages?parent_message_id=10" -H "Authorization: Bearer $KEY" \
+  -H "Content-Type: text/plain" -d "Looking into it."
+```
+
+`parent_message_id` goes in the query string. Sabha starts the thread if there isn't one, adds the app to it, and answers with the thread's own id as `channel_id`. A thread is a channel of its own, so post follow-ups straight to that id.
+
+Threads don't nest: a parent that's already in a thread is `422`.
+
+## Edit and delete
+
+```bash
+curl -X PATCH  "$API/messages/10" -H "Authorization: Bearer $KEY" -H "Content-Type: text/plain" -d "Deployed."
+curl -X DELETE "$API/messages/10" -H "Authorization: Bearer $KEY"
+```
+
+An app can edit and delete only its own messages. Another's is `403`.
+
+## React
+
+```bash
+curl -X POST   "$API/messages/10/reactions"   -H "Authorization: Bearer $KEY" -H "Content-Type: text/plain" -d "🎉"
+curl -X DELETE "$API/messages/10/reactions/7" -H "Authorization: Bearer $KEY"
+curl           "$API/messages/10/reactions"   -H "Authorization: Bearer $KEY"
+```
+
+Reactions are the emoji itself, not a `:shortcode:`. Reacting twice with the same emoji is `422` with `code: "already_reacted"`, so a retry can treat that as done.
+
+## Private replies
+
+A private reply is seen only by one person in the channel, marked "Only visible to you":
+
+```bash
+curl -X POST "$API/channels/$CHANNEL/ephemerals" -H "Authorization: Bearer $KEY" \
+  -H "Content-Type: application/json" -d '{ "user_id": 42, "text": "Your deploy is *queued*" }'
+```
+
+It takes `body` or `text`, and `blocks`, like a post, plus `parent_message_id` for a thread that already exists. It's never saved: it has no id, isn't in history, search or events, and is gone when the person reloads. Buttons and menus that send a click aren't allowed in one yet, and neither are images; link buttons are fine.
+
+Someone who isn't in the channel is `422` with `code: "user_not_in_channel"`. 60 a minute per app.
+
+## Attach metadata
+
+An app can tag its own message with what record it stands for, so it can find and update it later without parsing text. The shape is Slack's message metadata:
+
+```bash
+curl -X POST "$API/channels/$CHANNEL/messages" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+  -d '{ "text": "Deployed v2.3 to production", "metadata": { "event_type": "deploy", "event_payload": { "sha": "9f2c1e0", "env": "production" } } }'
+```
+
+- One per message. `event_type` is up to 64 letters, digits, `_` or `-`. `event_payload` is a JSON object of up to 8 KB, nested up to 10 levels.
+- On an edit, leaving `metadata` out keeps it and `{}` clears it. Changing it never marks the message as edited.
+- Any app that can read the message can read its metadata, so keep ids there, never secrets.
+- `GET /channels/:id/messages?metadata_type=deploy&limit=1` finds the latest message of a type.
+
+### Alerts
+
+One type, `alert`, Sabha draws itself: a card with the alert's status beside a coloured bar, in place of the message's text.
+
+| Field | |
+|---|---|
+| `status` | `firing` or `resolved`. Required. |
+| `title` | Required, up to 150 characters |
+| `severity` | Up to 32 |
+| `service` | Up to 100 |
+| `url` | A link to the alert, up to 3,000 |
+| `key` | The alert group's own id. Keep one card per key by editing it. |
+
+Any other field is refused. The message's text stays the summary that notifications and search show. Alertmanager and Grafana can post alerts like this with no code, through an [incoming webhook](/apps/incoming-webhooks/#alertmanager-and-grafana).
+
+## Read history
+
+```bash
+curl "$API/channels/$CHANNEL/messages?limit=50" -H "Authorization: Bearer $KEY"
+curl "$API/messages/10" -H "Authorization: Bearer $KEY"
+```
+
+Each message has `id`, `creator`, `body` (`html`, `plain` and `markdown`), `channel_id`, `thread`, `replies`, `url`, `attachment` and `created_at`, plus `blocks` and `metadata` when it has them. A single message adds `mentionees`.
+
+History comes newest first, a page at a time:
+
+```json
+{ "results": [ … ], "has_more": true, "next_cursor": "2026-09-10T08:30:00.123456Z|12345" }
+```
+
+Pass `next_cursor` back as `before` until `has_more` is false. To catch up, pass a timestamp as `after`. `limit` is 50 by default and 200 at most.
+
+To read a thread, read the thread's channel: its id is the parent's `replies.channel_id`.
+
+## Search
+
+```bash
+curl "$API/search?q=deploy&channel_ids[]=5&limit=20" -H "Authorization: Bearer $KEY"
+```
+
+Search covers the app's channels. It takes phrases (`"exact phrase"`) and prefixes (`deploy*`), filters by channel, author and time, and pages the same way as history.

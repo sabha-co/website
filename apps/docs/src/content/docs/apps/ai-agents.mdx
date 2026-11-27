@@ -1,0 +1,62 @@
+---
+title: Bring an AI agent
+description: Put OpenClaw, Hermes or an agent you built into your channels as an app.
+sidebar:
+  order: 10
+---
+
+An AI agent joins Sabha the way any app does: as a bot user with a key, in the channels an administrator picks. People mention it or message it, and it answers in the thread. It runs on your own machine or server, with your own model keys, and Sabha never sees them.
+
+## OpenClaw and Hermes
+
+Sabha knows how to set up [OpenClaw](https://openclaw.ai) and [Hermes](https://github.com/NousResearch/hermes-agent). Each has a Sabha package that opens the WebSocket, hears mentions and DMs, and replies through the API.
+
+<Steps>
+  <Step title="Add the app">
+    In **Settings → Apps**, add an app named after the agent, and put it in the channels it should answer in. See [Add an app](/apps/add-an-app/).
+  </Step>
+  <Step title="Pick the agent">
+    On the app's **API** tab, choose **OpenClaw** or **Hermes** under **Set up with**. The steps fill in your workspace's URLs and the app's key.
+  </Step>
+  <Step title="Run the steps">
+    Paste them on the machine where the agent runs. **Ask your agent** gives the same steps as a prompt, if you'd rather the agent set itself up.
+  </Step>
+</Steps>
+
+The steps look like this, with your values in:
+
+<Tabs>
+  <TabItem label="OpenClaw">
+    ```bash
+    openclaw plugins install @sabha-co/openclaw-sabha --accept-capabilities --force
+    openclaw sabha setup --url https://chat.example.com --cable-url 'wss://chat.example.com/cable' --key sabha_app_…
+    openclaw gateway restart
+    ```
+
+    The package is [`sabha-co/openclaw-sabha`](https://github.com/sabha-co/openclaw-sabha).
+  </TabItem>
+  <TabItem label="Hermes">
+    ```bash
+    hermes plugins install sabha-co/hermes-sabha
+    hermes plugins enable sabha-platform
+    hermes sabha setup --url https://chat.example.com/api/v1 --cable-url 'wss://chat.example.com/cable' --key sabha_app_… --allowed-users 1
+    hermes gateway restart
+    ```
+
+    The package is [`sabha-co/hermes-sabha`](https://github.com/sabha-co/hermes-sabha).
+  </TabItem>
+</Tabs>
+
+If the agent's gateway runs as a system service, restart it with the command its setup prints. Once it connects, the **API** tab says so and the app shows as online.
+
+## Any other agent
+
+Any agent framework fits the same shape: hear `message_created`, decide, and reply with `POST /channels/:id/messages`. To build one:
+
+- **Hand it `/skill`.** The reference on your workspace, at `https://chat.example.com/skill`, is written for language models. Give it to the agent as its tool description, or to a coding agent writing the integration.
+- **Reply in the thread.** Reply with `parent_message_id` set to the message that asked, so the channel stays readable. See [Reply in a thread](/apps/messages/#reply-in-a-thread).
+- **Show it's working.** Stream the reply as a [live draft](/apps/drafts/), or set a status line while the model thinks.
+- **Let people message it.** Turn on [`direct_messages`](/apps/channels/#letting-people-message-the-app) so people can start a conversation with it.
+- **Give it only what it needs.** Leave **Read messages in its channels** off if it should hear only what's said to it. See [Permissions](/apps/add-an-app/#permissions).
+
+Other apps' messages reach your agent only when they mention it by name, so two agents in a channel can't keep answering each other.

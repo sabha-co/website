@@ -1,0 +1,76 @@
+---
+title: Errors and limits
+description: Error codes, which calls are safe to retry, rate limits and API changes.
+sidebar:
+  order: 12
+---
+
+## Errors
+
+Every error from the apps API is JSON:
+
+```json
+{ "error": "Message body can't be blank", "code": "validation_failed" }
+```
+
+Check `code`, not `error`: the wording can change.
+
+| `code` | Status | When |
+|---|---|---|
+| `validation_failed` | 422 | Bad parameters, a card Sabha doesn't support, a blank body |
+| `already_reacted` | 422 | The app already reacted with this emoji |
+| `missing_permission` | 403 | The key doesn't have the [permission](/apps/add-an-app/#permissions) this call needs. `needed` names it. |
+| `forbidden` | 403 | Allowed by the key but not here: another app's message, a channel the app didn't create, DMs limited to administrators |
+| `not_found` | 404 | A channel the app isn't in, or something that doesn't exist |
+| `rate_limited` | 429 | Over a limit. Retry after `Retry-After`. |
+| `workspace_offline` | 503 | The workspace is offline for a moment, such as while it moves. Retry after `Retry-After`. |
+| `service_unavailable` | 503 | File storage is down |
+| `internal_error` | 500 | Something unexpected |
+
+A `missing_permission` error says which permission to ask an administrator for:
+
+```json
+{ "error": "This app's key doesn't have the read_messages permission", "code": "missing_permission", "needed": "read_messages" }
+```
+
+A `404` with an HTML body means the URL doesn't exist in this version of the API.
+
+## Retrying safely
+
+Each operation in the OpenAPI spec (`/api/v1/openapi.json`) has an `x-sabha-idempotency` saying how to retry it:
+
+| Value | Retry by |
+|---|---|
+| `client_message_id` | Sending the same `client_message_id` again |
+| `idempotency_key` | Sending the same `Idempotency-Key` header again |
+| `natural` | Repeating it: it lands in the same place, such as joining a channel twice |
+| `none` | Checking first: a repeat does it again |
+
+## Limits
+
+| What | Limit |
+|---|---|
+| Posts | 60 a minute per app |
+| Private replies | 60 a minute per app |
+| Draft calls | 600 a minute per app |
+| Status updates | 120 a minute per app |
+| Incoming webhook posts | 60 a minute per URL |
+| Clicks | 30 a minute per person |
+| Command runs | 10 a minute per person |
+| Commands | 25 per app |
+| Icon changes | 10 an hour |
+| History page | 50 by default, 200 at most |
+| Autocomplete | 20 people |
+| Draft text | 16 KB; a draft lasts 10 minutes |
+| Metadata | One per message; 8 KB, 10 levels |
+| `response_url` | 5 uses within 30 minutes |
+| Attachment URLs in events | 1 hour |
+| Webhook delivery | 10 seconds to connect; 300 seconds for an event Sabha may post a reply to, 30 for others; 10 retries |
+| Webhook suspension | After 5 events in a row fail every retry |
+| Missed events | The last 100, for up to 5 minutes, on the extended WebSocket protocol |
+
+## API changes
+
+The apps API is `v1`, and can still change before it's frozen. Each change that breaks an app is listed here, newest first.
+
+- **25 November 2026: rooms are channels.** Every path, field and event that said room now says channel. `/api/v1/rooms` is `/api/v1/channels`, `room` and `room_id` are `channel` and `channel_id`, `parent_room_id` is `parent_channel_id`, and the command event's `room_name` is `channel_name`. The old paths answer `404`.

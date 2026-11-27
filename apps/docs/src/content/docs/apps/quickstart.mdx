@@ -1,0 +1,95 @@
+---
+title: Build an app
+description: Post your first message, then listen for mentions and reply, in a few minutes.
+sidebar:
+  order: 2
+---
+
+This walks through an app that posts a message, then answers whenever someone mentions it. You need an administrator to [add the app](/apps/add-an-app/) and put it in a channel first. Have its **API base URL**, **WebSocket URL** and **key** to hand, from the app's **API** tab.
+
+## Post a message
+
+```bash
+API=https://chat.example.com/api/v1
+KEY=sabha_app_…
+
+curl "$API/me" -H "Authorization: Bearer $KEY"
+curl "$API/channels" -H "Authorization: Bearer $KEY"
+```
+
+`/me` checks the key and lists what it may do. `/channels` lists the channels the app is in. Pick one and post:
+
+```bash
+CHANNEL=5
+
+curl -X POST "$API/channels/$CHANNEL/messages" \
+  -H "Authorization: Bearer $KEY" \
+  -H "Content-Type: text/plain" \
+  -d "Hello from my first app"
+```
+
+The message appears in the channel under the app's name. An app that only posts, such as a cron job or a build step, needs nothing more. For one channel and no key at all, an [incoming webhook](/apps/incoming-webhooks/) is simpler still.
+
+## Listen and reply
+
+To hear when people mention it, an app opens a WebSocket to Sabha and subscribes to its events. The connection goes out from the app, so nothing needs to reach it from the internet.
+
+This Node script answers every mention in the same place it was asked: in the thread if it was a thread, in the channel otherwise. It uses the [`ws`](https://www.npmjs.com/package/ws) package, because a browser's `WebSocket` can't send the `Authorization` header Sabha needs.
+
+```js
+import WebSocket from "ws";
+import { randomUUID } from "node:crypto";
+
+const { SABHA_API_URL, SABHA_WEBSOCKET_URL, SABHA_APP_KEY } = process.env;
+const auth = { Authorization: `Bearer ${SABHA_APP_KEY}` };
+const identifier = JSON.stringify({ channel: "AppEventsChannel" });
+
+const socket = new WebSocket(SABHA_WEBSOCKET_URL, ["actioncable-v1-json"], { headers: auth });
+
+socket.on("message", async (data) => {
+  const frame = JSON.parse(data);
+
+  if (frame.type === "welcome") {
+    socket.send(JSON.stringify({ command: "subscribe", identifier }));
+  }
+
+  // Events are frames with no type whose message names an event.
+  const event = !frame.type && frame.message?.event ? frame.message : null;
+  if (event?.event !== "message_created" || !event.mentions_app) return;
+
+  await fetch(`${SABHA_API_URL}/channels/${event.channel.id}/messages`, {
+    method: "POST",
+    headers: { ...auth, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text: `Hi ${event.user.name}, you said: ${event.message.body.plain}`,
+      client_message_id: randomUUID(),
+    }),
+  });
+});
+```
+
+Run it with the three settings from the **API** tab:
+
+```bash
+SABHA_API_URL=https://chat.example.com/api/v1 \
+SABHA_WEBSOCKET_URL=wss://chat.example.com/cable \
+SABHA_APP_KEY=sabha_app_… \
+node app.mjs
+```
+
+Mention the app in its channel and it replies. While the script is connected, people see the app as online.
+
+A few things the script leans on:
+
+- **`client_message_id`** makes a post safe to retry: if the first attempt was saved, sending the same id again posts nothing. Send one with every post.
+- **`event.channel.id`** is the thread itself when the mention was in a thread, so the reply lands beside it.
+- **A real app reconnects.** Reconnect with a growing delay when the socket closes, and read history to catch up on anything missed. See [Receive events](/apps/events/#missed-events).
+
+## Next
+
+- [Receive events](/apps/events/): every event, who hears what, and the webhook alternative.
+- [Post and read](/apps/messages/): threads, mentions, reactions, files and history.
+- [Cards and buttons](/apps/cards/): ask a question people answer with a click.
+- [Slash commands](/apps/commands/): let people run `/deploy main`.
+
+Or hand `/skill` on your workspace to a coding agent and describe the app you want. It's the whole reference with your URLs filled in.

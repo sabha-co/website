@@ -1,0 +1,134 @@
+---
+title: Cards and buttons
+description: Post cards in Slack's Block Kit, with buttons, menus and date pickers people use in place.
+sidebar:
+  order: 6
+---
+
+An app's message can carry a card: headings, fields, text, images, and controls people use without leaving the channel. Cards are written in a subset of Slack's Block Kit, exactly as for Slack's `chat.postMessage`. A card that works here works the same in Slack.
+
+When someone clicks, Sabha checks who they are and tells only the app that posted the card. **The app registers no URL for clicks.** They arrive like any other event, so an app on the WebSocket can run an approval flow from behind a home router.
+
+## Post a card
+
+Send `blocks` with `body` or `text`:
+
+```bash
+curl -X POST "$API/channels/$CHANNEL/messages" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" -d '{
+  "text": "Deploy v2.3 to production?",
+  "blocks": [
+    { "type": "section", "text": { "type": "mrkdwn", "text": "Deploy *v2.3* to production?" } },
+    { "type": "actions", "block_id": "deploy", "elements": [
+      { "type": "button", "action_id": "run", "text": { "type": "plain_text", "text": "Run it" }, "value": "v2.3", "style": "primary",
+        "confirm": { "title": { "type": "plain_text", "text": "Deploy?" }, "text": { "type": "mrkdwn", "text": "This ships *v2.3*." },
+                     "confirm": { "type": "plain_text", "text": "Deploy" }, "deny": { "type": "plain_text", "text": "Not now" } } },
+      { "type": "button", "text": { "type": "plain_text", "text": "View PR" }, "url": "https://github.com/acme/app/pull/42" } ] }
+  ]
+}'
+```
+
+When a card has blocks, Sabha reads the card's own words for search, previews and notifications, and `text` isn't shown.
+
+### Blocks
+
+| Block | Holds |
+|---|---|
+| `section` | `text`, up to 10 `fields`, or both, and optionally one `accessory`: a button, menu, overflow, date picker or image |
+| `header` | Plain text, up to 150 characters |
+| `context` | Up to 10 small texts and images |
+| `image` | `image_url`, `alt_text`, and an optional `title` |
+| `rich_text` | Slack's rich text: sections, lists, quotes and code, with styles, links and emoji |
+| `markdown` | Standard Markdown, up to 12,000 characters across the message |
+| `divider` | A line |
+| `actions` | Up to 25 buttons, menus, overflows and date pickers |
+
+Nothing in a card notifies anyone. A `user` or `channel` in rich text shows as a muted name, since its id is Slack's.
+
+### Controls
+
+| Control | Shape | Sends the app |
+|---|---|---|
+| Button | `text`, `action_id`, `value`, and optionally `style` (`primary` or `danger`) and `confirm` | Its `value` |
+| Link button | A button with a `url` instead of a `value` | Nothing: it opens the link. An in-app path such as `/channels/3` opens in place. |
+| `static_select` | 1 to 100 `options` of `{ text, value, description }`, and optionally `placeholder`, `initial_option`, `confirm` | The chosen option, as soon as it's chosen |
+| `overflow` | A "⋯" menu of 2 to 5 options. An option with a `url` opens it instead. | The chosen option |
+| `datepicker` | Optionally `initial_date` (`YYYY-MM-DD`), `placeholder`, `confirm` | `selected_date`, as soon as it's picked |
+
+A `confirm` asks the person to say yes in the card itself before the click is sent.
+
+### Images
+
+An image needs `alt_text`: it's what a screen reader says and what shows if the image can't be loaded. Sabha fetches each image once when the message is saved and serves its own copy, so people never load it from your server. JPEG, PNG, GIF or WebP, up to 5 MB and 10 per message.
+
+### What's refused
+
+Sabha follows Slack's limits (50 blocks, a unique `block_id` in the message, a unique `action_id` in its block) and keeps the card under 50,000 characters of JSON. A missing `block_id` or `action_id` is filled in for you; set your own if your code looks controls up by id.
+
+Anything Sabha doesn't support is refused rather than dropped: inputs, time pickers, checkboxes, multi-selects, option groups, an unknown key, a link that isn't `https`, or text over its limit. The answer is `422 validation_failed`, naming the path to what's wrong.
+
+In [forum](/features/forums/) posts, cards can only have links: a post is read long after a click would make sense.
+
+## What people see
+
+Everyone in the channel sees the same card. When someone clicks:
+
+1. The control spins, the others in its row dim, and a line reads "Waiting for *your app*…".
+2. The wait ends when the app edits the message or posts in the channel.
+3. After about 15 seconds with neither, the controls come back with "No reply from *your app* yet. You can try again."
+
+A click isn't shown to anyone else. What the channel sees is whatever the app writes back, so **answer quickly, and show the result by editing the card**.
+
+If the app is removed, leaves the channel, or has neither a webhook nor a key that can connect, its controls show as disabled with the reason.
+
+## The click event
+
+Sabha sends the app a `block_actions` event:
+
+```json
+{
+  "id": "a1b2c3d4-…",
+  "event": "block_actions",
+  "user": { "id": 1, "name": "Alice", "role": "member" },
+  "channel": { "id": 5, "name": "General" },
+  "message": { "id": 10, "url": "https://chat.example.com/channels/5@10" },
+  "actions": [ { "action_id": "run", "block_id": "deploy", "type": "button", "value": "v2.3" } ],
+  "response_url": "https://chat.example.com/api/v1/interaction_responses?token=…"
+}
+```
+
+It's Slack's `block_actions`, with `message.id` where Slack has `message.ts`. `actions` holds the one control used. A menu or overflow sends `selected_option` instead of `value`, and a date picker sends `selected_date`.
+
+Sabha reads a button's `value` from the saved message, not from the browser, and checks that a menu's choice was one of its options. That's all it checks. Treat `value` as untrusted: sign anything that authorises something sensitive, and enforce single use or expiry in the app.
+
+Each person can click 30 times a minute.
+
+## Answer with `response_url`
+
+`response_url` answers this one click. It needs no key, lasts 30 minutes and works 5 times. Post a JSON envelope to it, with `body` or `text`, and `blocks`:
+
+| Envelope | Does |
+|---|---|
+| `{ "text": "Only you see this" }` | A private reply to the person who clicked |
+| `{ "response_type": "in_channel", "text": "Deploying v2.3…" }` | Posts a new message in the channel |
+| `{ "replace_original": true, "blocks": [ … ] }` | Replaces the card. Anything the envelope leaves out is cleared. |
+| `{ "delete_original": true }` | Deletes the card |
+
+An expired, used-up or altered token is `404`.
+
+## Update a card later
+
+The ordinary edit takes the same fields:
+
+```bash
+curl -X PATCH "$API/messages/10" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+  -d '{ "blocks": [ { "type": "context", "elements": [ { "type": "mrkdwn", "text": "Deployed by Alice" } ] } ] }'
+```
+
+Fields you leave out keep their value. `"blocks": []` removes the card.
+
+## An approval flow
+
+1. Post a card with **Approve** (`primary`, with a `confirm`) and **Reject** (`danger`).
+2. On a `block_actions` event whose `action_id` is `approve`, do the work.
+3. Post `{ "replace_original": true, "blocks": [ … "Deployed by Alice at 12:04" … ] }` to the `response_url`, so the whole channel sees who approved and the buttons go away.
+4. If the work takes a while, first post `{ "response_type": "in_channel", "text": "Deploying…" }` to the same `response_url`, then edit the card when it's done.

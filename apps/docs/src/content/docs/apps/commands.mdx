@@ -1,0 +1,60 @@
+---
+title: Slash commands
+description: Declare commands such as /deploy that people run from the message box.
+sidebar:
+  order: 7
+---
+
+An app can declare slash commands, as in Slack. Someone who types `/deploy main` in a channel the app is in runs the command instead of posting, and the app answers.
+
+## Declare commands
+
+Send the whole list at once. It replaces whatever the app declared before:
+
+```bash
+curl -X PUT "$API/profile/commands" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+  -d '{ "commands": [ { "name": "deploy", "description": "Ship a branch", "usage_hint": "[branch]" } ] }'
+```
+
+- A name is 1 to 32 lowercase letters, digits, `-` or `_`, and unique in the workspace. Names Sabha keeps for itself (`help`, `play`, `me`, `invite`, `leave`, `remind`, `topic`) and names another app has are refused.
+- The list is all or nothing. If any command is refused, the answer is `422` with a `refusals` list of `{ name, error }`, and nothing changes.
+- Up to 25 commands per app. `{ "commands": [] }` clears them.
+- `GET /profile/commands` reads the list back, with whether each command is `enabled`.
+
+An administrator can switch any command off on the app's **Commands** tab. It stays off when the app declares again, and frees its name for another app.
+
+## What people see
+
+Typing `/` at the start of the message box lists the commands of the apps in the channel, beside Sabha's own. Commands work in channels, DMs and threads the app is in. In forums and their posts, a `/` is just text.
+
+Running a command doesn't post what was typed. The person sees a private "Waiting for *your app*…" line until the app answers.
+
+## The command event
+
+```json
+{
+  "id": "a1b2c3d4-…",
+  "event": "command",
+  "command": "/deploy",
+  "text": "main <@7>",
+  "user_id": 1,
+  "user_name": "Alice",
+  "channel_id": 5,
+  "channel_name": "General",
+  "response_url": "https://chat.example.com/api/v1/interaction_responses?token=…"
+}
+```
+
+The fields are Slack's. `text` is what followed the command, with mentions written as `<@user_id>`. Run in a thread, `channel_id` is the thread, and `thread` is `{ id, parent_message_id, parent_channel_id }`.
+
+## Answer the command
+
+Answer within 15 seconds, in one of three ways:
+
+- **On a webhook**, respond `200` with `Content-Type: application/json` and the answer as the body, such as `{ "text": "Deployed" }`. An empty body means you'll answer later.
+- **On the WebSocket**, send a `message` command on the `AppEventsChannel` subscription whose `data` is `{ "action": "answer", "id": "<the event's id>", "text": "Deployed" }`. A refused answer comes back as `answer_refused`.
+- **Later**, post to the `response_url`, as for a [click](/apps/cards/#answer-with-response_url).
+
+The answer is private to the person who ran the command, unless it says `"response_type": "in_channel"`. After 15 seconds with no answer, their line says the app didn't answer.
+
+Each person can run 10 commands a minute.

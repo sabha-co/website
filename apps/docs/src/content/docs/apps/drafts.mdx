@@ -1,0 +1,81 @@
+---
+title: Live drafts and status
+description: Show a reply while it's being written, or a line saying what the app is doing.
+sidebar:
+  order: 8
+---
+
+An app that takes a while to answer, such as an AI agent, can show people it's working. A **draft** shows the reply as it's written. A **status** shows one line, such as "Reading the logs", until the reply lands.
+
+Neither notifies anyone, neither is saved, and other apps don't hear them. When the reply is ready, the app posts it as usual, and it replaces the draft or status.
+
+## Stream a draft
+
+People see the app's name and icon with the text so far. When the reply is done, post it with `client_message_id` set to the draft's id: it takes the draft's place and notifies once.
+
+<Tabs>
+  <TabItem label="API">
+    ```bash
+    ID=$(uuidgen)
+
+    # Open the draft where the reply will land
+    curl -X POST "$API/channels/42/drafts" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+      -d "{\"draft_id\": \"$ID\", \"parent_message_id\": 10}"
+
+    # Send the whole reply so far, as often as it changes
+    curl -X PATCH "$API/drafts/$ID" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+      -d '{"text": "The whole reply so far", "activity": "Reading the logs"}'
+
+    # Post the finished reply in its place
+    curl -X POST "$API/channels/42/messages?parent_message_id=10" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+      -d "{\"body\": \"The finished reply\", \"client_message_id\": \"$ID\"}"
+
+    # Or, if there's no reply after all
+    curl -X DELETE "$API/drafts/$ID" -H "Authorization: Bearer $KEY"
+    ```
+  </TabItem>
+  <TabItem label="WebSocket">
+    Send each frame as a `message` command on the `AppEventsChannel` subscription, then post the reply through the API as usual:
+
+    ```json
+    { "action": "draft", "draft_id": "<a UUID>", "kind": "start", "channel_id": 42, "parent_message_id": 10 }
+    { "action": "draft", "draft_id": "<the same>", "kind": "text", "text": "The whole reply so far" }
+    { "action": "draft", "draft_id": "<the same>", "kind": "activity", "title": "Reading the logs" }
+    { "action": "draft", "draft_id": "<the same>", "kind": "end" }
+    ```
+
+    A refused frame comes back as `{ "event": "draft_refused", "draft_id", "error" }`. Post the reply as usual then.
+  </TabItem>
+</Tabs>
+
+- **The app picks the `draft_id`**, a UUID, so opening it again after a lost response shows the same draft, not a second one.
+- **Open it where the reply will land**: a channel, or with `parent_message_id` the thread under that message.
+- **Each update sends the whole text so far**, up to 16 KB, not just the new part, so a lost or repeated update costs nothing. `activity` sets a line under it.
+- **Over the API, send one update at a time** and wait for each. Updates sent in parallel can land out of order.
+- **Batch what a model streams** into an update every 250 to 500 milliseconds. Sabha shows about ten text updates a second and drops the rest, since the next carries the same text. An app can make 600 draft calls a minute.
+- **End it only if there's no reply.** Posting anywhere the draft was ends it; only a post carrying its id replaces it in place.
+
+Sabha ends a draft after a minute with no new text, or 10 minutes after it started, so a crashed app doesn't leave one spinning.
+
+## Set a status
+
+For an app that posts whole replies, a status shows one line while it works, like Slack's `assistant.threads.setStatus`:
+
+```bash
+curl -X PUT "$API/channels/42/status" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+  -d '{"status": "Reading the logs", "parent_message_id": 10}'
+
+curl -X DELETE "$API/channels/42/status?parent_message_id=10" -H "Authorization: Bearer $KEY"
+```
+
+Or over the WebSocket:
+
+```json
+{ "action": "draft", "kind": "status", "channel_id": 42, "parent_message_id": 10, "status": "Reading the logs" }
+```
+
+- An app has one status per place: a channel, or a thread with `parent_message_id`. Setting it again changes the line.
+- It clears when the app posts there, when it's set blank or deleted, after 2 minutes with no update, or 10 minutes after it was first set.
+- Setting one answers with a `draft_id`. Post the reply with that as its `client_message_id` to replace the status in place, or open a draft with it to start streaming.
+
+An app can update its statuses 120 times a minute.
