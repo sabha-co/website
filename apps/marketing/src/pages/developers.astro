@@ -1,0 +1,273 @@
+---
+import Marketing from "../layouts/Marketing.astro";
+import AgentIcon from "../components/AgentIcon.astro";
+import { GITHUB_URL, SIGN_UP_PATH } from "@sabha/theme/site";
+import "../styles/home.css";
+import "../styles/developers.css";
+
+const sections = [
+  { id: "api", label: "Slack-shaped API" },
+  { id: "bots", label: "Your own bots" },
+  { id: "agent", label: "The built-in agent" },
+  { id: "self-hosting", label: "Self-hosting" },
+];
+
+const slackToSabha = [
+  { slack: "chat.postMessage", sabha: "POST /channels/:id/messages", code: true },
+  { slack: "reactions.add", sabha: "POST /messages/:id/reactions", code: true },
+  { slack: "Slash commands", sabha: "Slash commands" },
+  { slack: "Block Kit buttons", sabha: "Cards and buttons" },
+  { slack: "Incoming webhooks", sabha: "Incoming webhooks" },
+  { slack: "Events API", sabha: "Webhooks and a WebSocket stream" },
+];
+
+const providers = ["OpenAI", "Google", "OpenRouter", "OpenAI-compatible server"];
+---
+
+<Marketing
+  title="Developers"
+  description="What you can build on Sabha and how it runs: an API shaped like Slack's, room for the AI bots you run, an agent you can read, and a server you own."
+>
+  <section class="landing-hero dev-hero">
+    <div class="landing-inner dev-hero-inner">
+      <span class="landing-label">DEVELOPERS</span>
+      <h1>What you can build on Sabha, and how it runs.</h1>
+      <p class="dev-hero-sub">Sabha is open-source team chat with an API shaped like Slack's, room for the AI bots you run, an agent you can read, and a server you own.</p>
+      <a href="/docs/apps/quickstart" class="dev-more">Build your first app in a few minutes →</a>
+      <nav class="dev-jump" aria-label="On this page">
+        {sections.map((section) => <a href={`#${section.id}`}>{section.label}</a>)}
+      </nav>
+    </div>
+  </section>
+
+  {/* How it fits together */}
+  <section class="dev-overview">
+    <div class="landing-inner">
+      <div class="home-panel dev-map">
+        <div class="dev-map-head">
+          <h2>How it fits together</h2>
+          <p>Everything inside the dashed line runs on your server</p>
+        </div>
+        <div class="dev-map-diagram">
+          <div class="dev-map-box">
+            <div class="home-eyebrow">Your bots and apps</div>
+            <ul>
+              <li>OpenClaw, Hermes</li>
+              <li>Your Slack bot, ported</li>
+              <li>CI, alerts, scripts</li>
+            </ul>
+          </div>
+          <div class="dev-map-link" aria-hidden="true">
+            <span>REST · webhooks</span>
+            <i></i>
+            <span>event stream</span>
+          </div>
+          <div class="dev-map-server">
+            <div class="home-eyebrow">Your server · any VPS</div>
+            <div class="dev-map-box">
+              <div class="dev-map-sabha">Sabha</div>
+              <dl>
+                <div><dt>App</dt><dd>Rails, open source</dd></div>
+                <div><dt>Data</dt><dd>One SQLite file</dd></div>
+                <div><dt>Live updates</dt><dd>WebSockets</dd></div>
+              </dl>
+            </div>
+            <div class="dev-map-box dev-map-agent">
+              <AgentIcon size="sm" />
+              <div><strong>Built-in agent</strong><span>Reads channels and the wiki</span></div>
+            </div>
+          </div>
+          <div class="dev-map-link" aria-hidden="true">
+            <span>your key</span>
+            <i></i>
+            <span>MCP</span>
+          </div>
+          <div class="dev-map-outside">
+            <div class="dev-map-box">
+              <div class="home-eyebrow">Model provider</div>
+              <p>Anthropic, OpenAI, Google, OpenRouter or your own</p>
+            </div>
+            <div class="dev-map-box">
+              <div class="home-eyebrow">Connections</div>
+              <p>Linear, GitHub, Notion, over each one's MCP server</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Slack-shaped API */}
+  <section id="api" class="landing-section">
+    <div class="landing-inner home-row home-row--reverse">
+      <div class="home-panel home-row-panel" aria-hidden="true">
+        <div class="home-card dev-mapping">
+          <div class="dev-mapping-row dev-mapping-head">
+            <span class="home-eyebrow">On Slack</span>
+            <span class="home-eyebrow">On Sabha</span>
+          </div>
+          {slackToSabha.map((row) => (
+            <div class:list={["dev-mapping-row", { "dev-mapping-row--code": row.code }]}>
+              <span>{row.slack}</span>
+              <span>{row.sabha}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div class="home-row-text">
+        <span class="landing-label">SLACK-SHAPED API</span>
+        <h2>Port your Slack bot in an afternoon.</h2>
+        <ul class="home-points">
+          <li><a href="/docs/apps/commands" class="landing-link">Slash commands</a>, <a href="/docs/apps/cards" class="landing-link">cards and buttons</a></li>
+          <li>Webhooks and a <a href="/docs/apps/events" class="landing-link">live event stream</a></li>
+          <li>The same fields: <a href="/docs/apps/messages" class="landing-link">text, blocks, threads</a></li>
+          <li>Each app gets <a href="/docs/apps/add-an-app" class="landing-link">its own key and permissions</a></li>
+        </ul>
+        <div class="dev-more-row">
+          <a href="/docs/apps/slack" class="dev-more">Port a Slack app →</a>
+          <a href="/docs/apps#reference" class="dev-more">OpenAPI spec →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="landing-divider"></div>
+
+  {/* Your own bots */}
+  <section id="bots" class="landing-section">
+    <div class="landing-inner home-row">
+      <div class="home-panel home-row-panel" aria-hidden="true">
+        <div class="home-card home-bots">
+          <div class="home-eyebrow">Bots in this team</div>
+          <div class="home-bot">
+            <span class="home-av home-av--lg home-av--openclaw"></span>
+            <div><strong>OpenClaw</strong><span>Jason's bot · reads # engineering</span></div>
+            <em>● Connected</em>
+          </div>
+          <div class="home-bot">
+            <span class="home-av home-av--lg home-av--hermes"></span>
+            <div><strong>Hermes</strong><span>Ops bot · answers in # support</span></div>
+            <em>● Connected</em>
+          </div>
+          <div class="home-bot">
+            <span class="home-av home-av--lg home-av--empty"></span>
+            <div><strong>Your own bot</strong><span>Through the API · any channel it's invited to</span></div>
+            <em class="home-bot-add">+ Add</em>
+          </div>
+        </div>
+      </div>
+      <div class="home-row-text">
+        <span class="landing-label">BRING YOUR OWN BOTS</span>
+        <h2>Plug in the AI bots you already run.</h2>
+        <ul class="home-points">
+          <li><a href="/openclaw" class="landing-link">OpenClaw</a> and Hermes connect out of the box</li>
+          <li>Anything else joins <a href="/docs/apps/ai-agents#any-other-agent" class="landing-link">through the API</a></li>
+          <li>They read, reply, thread and react like members</li>
+          <li>No plugin per framework</li>
+        </ul>
+        <a href="/docs/apps/ai-agents" class="dev-more">Bring an AI bot →</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="landing-divider"></div>
+
+  {/* The built-in agent */}
+  <section id="agent" class="landing-section">
+    <div class="landing-inner home-row home-row--reverse">
+      <div class="home-panel home-row-panel dev-agent" aria-hidden="true">
+        <div class="home-card dev-providers">
+          <div class="home-eyebrow">Model provider</div>
+          <div class="dev-provider dev-provider--on">
+            <span class="dev-radio"></span>
+            <strong>Anthropic</strong>
+            <code>sk-ant-•••• 4f2a</code>
+          </div>
+          {providers.map((name) => (
+            <div class="dev-provider">
+              <span class="dev-radio"></span>
+              <span>{name}</span>
+            </div>
+          ))}
+        </div>
+        <div class="home-card dev-wiki-page">
+          <div class="dev-wiki-head">
+            <code>wiki/deploys.md</code>
+            <span>Edit</span>
+          </div>
+          <pre><b># Deploys</b>
+
+We ship on Tuesdays and Thursdays.
+Freeze starts Friday at noon.
+
+<i>— Priya, confirmed 12 Nov</i></pre>
+        </div>
+      </div>
+      <div class="home-row-text">
+        <span class="landing-label">THE BUILT-IN AGENT</span>
+        <h2>An agent you can read, not a black box.</h2>
+        <ul class="home-points">
+          <li>Any model provider, on your own key</li>
+          <li>Tools over MCP, from each vendor's server</li>
+          <li>Its memory is a markdown wiki you can edit</li>
+          <li>Every line of it is open source</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="landing-divider"></div>
+
+  {/* Self-hosting */}
+  <section id="self-hosting" class="landing-section">
+    <div class="landing-inner home-row">
+      <div class="home-panel home-row-panel dev-host" aria-hidden="true">
+        <div class="dev-terminal">
+          <div class="dev-terminal-bar"><i></i><i></i><i></i><span>~/sabha</span></div>
+          <pre><b>$</b> git clone github.com/sabha-co/sabha
+<b>$</b> kamal deploy
+<i>  Finished all in 94.2 seconds</i>
+<b>$</b> ssh chat.acme.dev du -sh /disk/sabha
+<em>  1.4G  /disk/sabha</em></pre>
+        </div>
+        <div class="home-card dev-server">
+          <div class="dev-server-head">
+            <span class="home-eyebrow">Your server</span>
+            <em>● Running</em>
+          </div>
+          <dl>
+            <div><dt>VPS</dt><dd>2 vCPU · 4 GB · $20/mo</dd></div>
+            <div><dt>Database</dt><dd>SQLite, one file</dd></div>
+            <div><dt>Your messages</dt><dd>Stored only here</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="home-row-text">
+        <span class="landing-label">RUN IT ANYWHERE</span>
+        <h2>One server, one SQLite file, all yours.</h2>
+        <ul class="home-points">
+          <li>Runs on any VPS, from a $20 box</li>
+          <li>Your data stays on your network</li>
+          <li>Back up or move it by <a href="/docs/self-hosting/deploy#backups" class="landing-link">copying a folder</a></li>
+          <li><a href={GITHUB_URL} class="landing-link" target="_blank" rel="noopener">Fork it</a> and change anything, MIT licensed</li>
+        </ul>
+        <a href="/docs/self-hosting/deploy" class="dev-more">Deploy Sabha →</a>
+      </div>
+    </div>
+  </section>
+
+  {/* Final Cta */}
+  <section class="landing-section landing-final-cta">
+    <div class="landing-inner">
+      <h2>Start building.</h2>
+      <p class="landing-final-cta-sub">Get a workspace on sabha.co in a minute, or deploy your own on any server.</p>
+      <div class="landing-cta-row">
+        <a href={SIGN_UP_PATH} class="landing-btn-primary">
+          Create a workspace
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+        </a>
+        <a href="/docs/apps/quickstart" class="landing-btn-secondary">Build your first app</a>
+      </div>
+    </div>
+  </section>
+</Marketing>

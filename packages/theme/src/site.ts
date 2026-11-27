@@ -24,6 +24,7 @@ export const EXAMPLE_COMMUNITY_URL = "https://sabha.co/1000101/join/vWZP-NBZX-tE
 export const headerNav: NavLink[] = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "Developers", href: "/developers" },
   { label: "Docs", href: "/docs" },
   { label: "Blog", href: "/blog" },
   { label: "GitHub", href: GITHUB_URL, external: true },
@@ -35,6 +36,7 @@ export const footerColumns: { heading: string; links: NavLink[] }[] = [
     links: [
       { label: "Features", href: "/#features" },
       { label: "Pricing", href: "/#pricing" },
+      { label: "Developers", href: "/developers" },
       { label: "OpenClaw", href: "/openclaw" },
       { label: "Changelog", href: "/changelog" },
       { label: "Docs", href: "/docs" },

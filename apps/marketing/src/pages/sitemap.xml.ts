@@ -6,6 +6,7 @@ import { siteUrl } from "@sabha/theme/site";
 const PAGES = [
   { path: "/", changefreq: "monthly", priority: "1.0" },
   { path: "/about", changefreq: "monthly", priority: "0.8" },
+  { path: "/developers", changefreq: "monthly", priority: "0.8" },
   { path: "/changelog", changefreq: "weekly", priority: "0.6" },
   { path: "/openclaw", changefreq: "monthly", priority: "0.8" },
   { path: "/terms", changefreq: "yearly", priority: "0.3" },

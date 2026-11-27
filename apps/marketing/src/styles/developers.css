@@ -1,0 +1,546 @@
+/* The developers page: home.css's panels and rows, plus a left-aligned
+   header, the "how it fits together" map, and the code-flavoured pictures.
+   Terminals stay dark in both colour schemes, like a real one. */
+
+.landing {
+  --dev-terminal-bg: #15171a;
+  --dev-terminal-line: #2a2e35;
+  --dev-terminal-text: #d7dae0;
+  --dev-terminal-dim: #8a919c;
+  --dev-terminal-prompt: #ff8a7a;
+  --dev-terminal-ok: #9fd4a8;
+}
+
+/* ═══════════════════════════ HEADER ═══════════════════════════ */
+
+.landing-hero.dev-hero {
+  padding: 5.5rem 0 3.5rem;
+}
+
+.dev-hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.landing .dev-hero h1 {
+  max-width: none;
+  font-size: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+  text-align: left;
+}
+
+.dev-hero-sub {
+  max-width: 45rem;
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.dev-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.dev-jump a {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--border-gray);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sabha-color-text-secondary);
+  text-decoration: none;
+  transition: border-color 0.1s;
+}
+
+.dev-jump a:hover {
+  border-color: var(--text-secondary);
+}
+
+.dev-jump a:focus-visible {
+  outline: 2px solid var(--accent-red);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════ HOW IT FITS TOGETHER ═══════════════════════════ */
+
+.dev-map {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2.5rem 3rem 3rem;
+}
+
+.dev-map-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+}
+
+.landing .dev-map-head h2 {
+  max-width: none;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  text-align: left;
+}
+
+.dev-map-head p {
+  color: var(--text-secondary);
+}
+
+.dev-map-diagram {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8rem minmax(0, 1.3fr) 8rem minmax(0, 1fr);
+  align-items: center;
+}
+
+.dev-map-box {
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  background: var(--bg-white);
+  overflow: hidden;
+}
+
+.dev-map-box .home-eyebrow {
+  padding: 0.875rem 1.125rem 0.625rem;
+}
+
+.dev-map-box ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dev-map-box li,
+.dev-map-box p {
+  padding: 0.625rem 1.125rem;
+  border-top: 1px solid var(--border-gray);
+  color: var(--text-primary);
+}
+
+.dev-map-box li:last-child,
+.dev-map-box p {
+  padding-bottom: 0.875rem;
+}
+
+.dev-map-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.dev-map-link i {
+  align-self: stretch;
+  height: 2px;
+  background: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.dev-map-server {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem;
+  border: 1.5px dashed var(--text-secondary);
+  border-radius: 12px;
+}
+
+.dev-map-server > .home-eyebrow {
+  padding-left: 0.25rem;
+}
+
+.dev-map-sabha {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 0.625rem;
+  font-weight: 600;
+}
+
+.dev-map-sabha::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-red);
+}
+
+.dev-map-server dl,
+.dev-server dl {
+  margin: 0;
+}
+
+.dev-map-server dl > div,
+.dev-server dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--border-gray);
+  font-size: 0.8125rem;
+}
+
+.dev-map-server dl > div:last-child {
+  padding-bottom: 0.75rem;
+}
+
+.dev-map-server dt,
+.dev-server dt {
+  color: var(--text-secondary);
+}
+
+.dev-map-server dd,
+.dev-server dd {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.dev-map-agent {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+}
+
+.dev-map-agent div {
+  display: flex;
+  flex-direction: column;
+}
+
+.dev-map-agent span {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.dev-map-outside {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ═══════════════════════════ SECTIONS ═══════════════════════════ */
+
+.dev-more-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+}
+
+.landing a.dev-more {
+  padding-top: 0.5rem;
+  font-weight: 600;
+  color: var(--accent-red);
+  text-decoration: none;
+}
+
+.landing a.dev-more:hover {
+  text-decoration: underline;
+}
+
+.landing a.dev-more:focus-visible {
+  outline: 2px solid var(--accent-red);
+  outline-offset: 2px;
+}
+
+/* Slack → Sabha */
+.dev-mapping {
+  width: min(34rem, 100% - 3rem);
+  overflow: hidden;
+}
+
+.dev-mapping-row {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--border-gray);
+}
+
+.dev-mapping-row span:first-child {
+  color: var(--text-secondary);
+}
+
+.dev-mapping-row--code span {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.dev-mapping-row.dev-mapping-head {
+  padding: 1rem 1.25rem 0.625rem;
+  border-top: none;
+}
+
+.dev-mapping-head .home-eyebrow:last-child {
+  color: var(--accent-red);
+}
+
+/* The built-in agent */
+.dev-agent {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 2.5rem 0 0 3rem;
+}
+
+.dev-providers {
+  width: min(24rem, 100% - 3rem);
+  overflow: hidden;
+}
+
+.dev-providers .home-eyebrow {
+  padding: 1rem 1.25rem 0.625rem;
+}
+
+.dev-provider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--border-gray);
+}
+
+.dev-provider:last-child {
+  padding-bottom: 1rem;
+}
+
+.dev-provider strong {
+  flex-grow: 1;
+}
+
+.dev-provider code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.dev-provider--on {
+  background: var(--home-wash);
+}
+
+.dev-radio {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--text-secondary);
+  border-radius: 50%;
+}
+
+.dev-provider--on .dev-radio {
+  border: 5px solid var(--accent-red);
+}
+
+.dev-wiki-page {
+  position: absolute;
+  right: 2.5rem;
+  bottom: 2.25rem;
+  width: 19rem;
+  overflow: hidden;
+}
+
+.dev-wiki-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-gray);
+}
+
+.dev-wiki-head code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.dev-wiki-head span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-red);
+}
+
+.dev-wiki-page pre {
+  margin: 0;
+  padding: 0.875rem 1rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  color: var(--sabha-color-text-secondary);
+}
+
+.dev-wiki-page pre b {
+  color: var(--text-primary);
+}
+
+.dev-wiki-page pre i {
+  font-style: normal;
+  color: var(--text-secondary);
+}
+
+/* Self-hosting */
+.dev-host {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 3.5rem 0 0 3rem;
+}
+
+.dev-terminal {
+  width: min(30rem, 100% - 3rem);
+  border-radius: 8px;
+  background: var(--dev-terminal-bg);
+  box-shadow: var(--home-card-shadow);
+  overflow: hidden;
+}
+
+.dev-terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.125rem;
+  border-bottom: 1px solid var(--dev-terminal-line);
+}
+
+.dev-terminal-bar i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3a3f47;
+}
+
+.dev-terminal-bar span {
+  padding-left: 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--dev-terminal-dim);
+}
+
+.dev-terminal pre {
+  margin: 0;
+  padding: 1.125rem 1.375rem 1.375rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: var(--dev-terminal-text);
+}
+
+.dev-terminal b {
+  font-weight: 400;
+  color: var(--dev-terminal-prompt);
+}
+
+.dev-terminal pre i {
+  font-style: normal;
+  color: var(--dev-terminal-dim);
+}
+
+.dev-terminal pre em {
+  font-style: normal;
+  color: var(--dev-terminal-ok);
+}
+
+.dev-server {
+  position: absolute;
+  right: 2.5rem;
+  bottom: 3rem;
+  width: 19rem;
+  overflow: hidden;
+}
+
+.dev-server-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.625rem;
+}
+
+.dev-server-head em {
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 600;
+  color: var(--home-green);
+}
+
+.dev-server dl > div {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+.dev-server dl > div:last-child {
+  padding-bottom: 1rem;
+}
+
+.dev-server dd {
+  font-weight: 600;
+}
+
+/* ═══════════════════════════ SMALLER SCREENS ═══════════════════════════ */
+
+@media (max-width: 1024px) {
+  .dev-map-diagram {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .dev-map-link {
+    flex-direction: row;
+    justify-content: center;
+    padding: 0.25rem 0;
+  }
+
+  .dev-map-link i {
+    align-self: auto;
+    width: 2px;
+    height: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-hero.dev-hero {
+    padding: 3.5rem 0 2.5rem;
+  }
+
+  .dev-hero-sub {
+    font-size: 1.0625rem;
+  }
+
+  .dev-map {
+    padding: 1.5rem 1rem;
+  }
+
+  .dev-agent,
+  .dev-host {
+    padding: 2rem 1rem;
+  }
+
+  .dev-mapping,
+  .dev-providers,
+  .dev-terminal {
+    width: 100%;
+  }
+
+  .dev-mapping-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+
+  .dev-mapping-row.dev-mapping-head {
+    display: none;
+  }
+
+  .dev-wiki-page,
+  .dev-server {
+    position: static;
+    width: 100%;
+  }
+}
