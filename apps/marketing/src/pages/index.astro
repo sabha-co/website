@@ -66,59 +66,7 @@ const connections = ["GitHub", "Linear", "Jira", "Notion", "Sentry"];
       </div>
 
       <div class="home-panel home-hero-stage" aria-hidden="true">
-        <div class="home-window">
-          <div class="home-window-sidebar">
-            <div class="home-window-workspace"><span class="home-window-workspace-mark">A</span> Acme</div>
-            <span># general</span>
-            <span class="is-current"># engineering</span>
-            <span># releases</span>
-            <span># design</span>
-          </div>
-          <div class="home-window-main">
-            <div class="home-window-title"># engineering</div>
-            <div class="home-window-messages">
-              <div class="home-msg">
-                <span class="home-av home-av--jason"></span>
-                <div><div class="home-msg-name">Jason <time>10:31</time></div><p>Push gating fix is merged. Shipping to staging after lunch.</p></div>
-              </div>
-              <div class="home-msg">
-                <span class="home-av home-av--bot">CI</span>
-                <div><div class="home-msg-name">Deploy bot <small>APP</small> <time>10:38</time></div><p>main is green · deployed to staging in 2m 14s</p></div>
-              </div>
-              <div class="home-msg">
-                <span class="home-av home-av--maya"></span>
-                <div><div class="home-msg-name">Maya <time>10:42</time></div><p>@Sabha Agent is presence still in Redis?</p></div>
-              </div>
-              <div class="home-msg">
-                <AgentIcon />
-                <div class="home-msg-body">
-                  <div class="home-msg-name">Sabha Agent <time>10:42</time></div>
-                  <p>No. It moved to AnyCable's memory broker in October.</p>
-                  <div class="home-ask">
-                    <div class="home-ask-label">Company brain · needs a yes</div>
-                    <p>Presence: AnyCable memory broker, 45s TTL.</p>
-                    <div class="home-ask-actions">
-                      <span class="home-chip home-chip--ink">Confirm</span>
-                      <span class="home-chip">Edit</span>
-                      <span class="home-chip home-chip--quiet">Not now</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="home-msg home-msg--typing">
-                <span class="home-typing"><i></i><i></i><i></i></span>
-                <p>Sabha Agent is checking the deploy notes…</p>
-              </div>
-            </div>
-            <div class="home-window-composer">Message # engineering</div>
-          </div>
-        </div>
-        <div class="home-card home-hero-page">
-          <div class="home-eyebrow">Company brain · Signed</div>
-          <div class="home-hero-page-title">Presence and push</div>
-          <p>Presence lives in AnyCable's memory broker with a 45s TTL.</p>
-          <div class="home-byline"><span class="home-av home-av--sm home-av--maya"></span> Signed by Maya · today</div>
-        </div>
+        <img class="home-shot home-shot--hero" src="/_site/screenshots/home-hero.webp" width="2880" height="1626" alt="" />
       </div>
 
       <ul class="home-reasons">
@@ -178,24 +126,7 @@ const connections = ["GitHub", "Linear", "Jira", "Notion", "Sentry"];
   <section class="landing-section">
     <div class="landing-inner home-row">
       <div class="home-panel home-row-panel home-brain" aria-hidden="true">
-        <div class="home-card home-page-card">
-          <div class="home-page-card-head">
-            <span class="home-eyebrow">Company brain · Real-time stack</span>
-            <span class="home-pill">Editing</span>
-          </div>
-          <div class="home-page-card-title">Presence and push</div>
-          <p>We run one AnyCable server beside Rails. <del>Presence is stored in Redis.</del> <ins>Presence lives in AnyCable's memory broker with a 45s TTL.</ins></p>
-          <div class="home-page-card-foot">
-            <span>Maya · editing now</span>
-            <span class="home-chip home-chip--ink">Sign and save</span>
-          </div>
-        </div>
-        <div class="home-card home-history">
-          <div class="home-eyebrow">Page history</div>
-          <div class="home-history-row"><span class="home-av home-av--sm home-av--maya"></span><p><strong>Maya</strong> fixed where presence lives · now</p></div>
-          <div class="home-history-row"><AgentIcon size="sm" /><p><strong>Agent</strong> drafted, <strong>Jason</strong> signed · Tue</p></div>
-          <div class="home-history-row"><span class="home-av home-av--sm home-av--jason"></span><p><strong>Priya</strong> started the page · Oct 2</p></div>
-        </div>
+        <img class="home-shot home-shot--page" src="/_site/screenshots/home-brain.webp" width="1400" height="1250" alt="" loading="lazy" />
       </div>
       <div class="home-row-text">
         <span class="landing-label">COMPANY BRAIN</span>
@@ -215,23 +146,7 @@ const connections = ["GitHub", "Linear", "Jira", "Notion", "Sentry"];
   <section class="landing-section">
     <div class="landing-inner home-row home-row--reverse">
       <div class="home-panel home-row-panel" aria-hidden="true">
-        <div class="home-card home-answer">
-          <div class="home-msg">
-            <span class="home-av home-av--priya"></span>
-            <div><div class="home-msg-name">Priya <time>· joined Monday</time></div><p>@Sabha Agent why are we on AnyCable and not ActionCable?</p></div>
-          </div>
-          <div class="home-msg">
-            <AgentIcon />
-            <div class="home-msg-body">
-              <div class="home-msg-name">Sabha Agent</div>
-              <p>The team chose AnyCable in July so presence and push stay fast with one small server. David signed the decision.</p>
-              <div class="home-sources">
-                <span class="home-source">↗ Real-time stack</span>
-                <span class="home-source">↗ Decision · July 14</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <img class="home-shot home-shot--answer" src="/_site/screenshots/home-answer.webp" width="834" height="1260" alt="" loading="lazy" />
       </div>
       <div class="home-row-text">
         <span class="landing-label">ANSWERS WITH SOURCES</span>
