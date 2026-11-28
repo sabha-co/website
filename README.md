@@ -4,7 +4,7 @@ Sabha's public sites, each an Astro app deployed as its own Cloudflare Worker on
 
 | App | Path | What it is |
 |---|---|---|
-| `apps/marketing` | `/`, `/about`, `/changelog`, `/terms`, `/privacy`, `/openclaw` | Static landing and company pages |
+| `apps/marketing` | `/`, `/about`, `/developers`, `/changelog`, `/terms`, `/privacy`, `/openclaw` | Static landing and company pages |
 | `apps/docs` | `/docs` | Static docs site on Nimbus |
 | `apps/blog` | `/blog`, admin at `/_emdash` | The EmDash blog, with D1 and R2 |
 

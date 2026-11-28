@@ -9,7 +9,7 @@ import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 
 export const CLAIMED_PATHS = {
-  marketing: ["/", "/about", "/changelog", "/terms", "/privacy", "/openclaw", "/robots.txt", "/sitemap.xml", "/llms.txt"],
+  marketing: ["/", "/about", "/developers", "/changelog", "/terms", "/privacy", "/openclaw", "/robots.txt", "/sitemap.xml", "/llms.txt"],
   docs: ["/docs", "/docs/", "/docs/llms.txt"],
   blog: ["/blog", "/blog/sitemap.xml", "/blog/rss.xml", "/_emdash/admin"],
 };

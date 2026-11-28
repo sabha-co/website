@@ -23,6 +23,7 @@
 		{ "pattern": "next.sabha.co/changelog*", "zone_name": "sabha.co" },
 		{ "pattern": "next.sabha.co/terms*", "zone_name": "sabha.co" },
 		{ "pattern": "next.sabha.co/privacy*", "zone_name": "sabha.co" },
+		{ "pattern": "next.sabha.co/developers*", "zone_name": "sabha.co" },
 		{ "pattern": "next.sabha.co/openclaw*", "zone_name": "sabha.co" },
 		{ "pattern": "next.sabha.co/robots.txt*", "zone_name": "sabha.co" },
 		{ "pattern": "next.sabha.co/sitemap.xml*", "zone_name": "sabha.co" },

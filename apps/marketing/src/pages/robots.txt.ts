@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { siteUrl } from "@sabha/theme/site";
 
 // Crawlers may read the public sites; the app behind them is off limits.
-const ALLOWED = ["/$", "/about", "/changelog", "/openclaw", "/terms", "/privacy", "/docs", "/blog", "/_site/"];
+const ALLOWED = ["/$", "/about", "/developers", "/changelog", "/openclaw", "/terms", "/privacy", "/docs", "/blog", "/_site/"];
 const SITEMAPS = ["/sitemap.xml", "/docs/sitemap-index.xml", "/blog/sitemap.xml"];
 
 export const GET: APIRoute = () =>
